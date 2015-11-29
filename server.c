@@ -129,7 +129,6 @@ void *request_handler(int newsock_fd, char* request){
   char *input;
   input = calloc(80, 1);
 
-
   strcat(input, ".");
   strcat(input, request);
   printf("->>>>>> %s\n", input);
