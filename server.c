@@ -7,10 +7,14 @@
 #include <string.h>
 #include <sys/types.h> 
 #include <netinet/in.h>
+#include <pthread.h> //for threading , link with lpthread
 
+//the thread function
+void *connection_handler(int);
+void *request_handler(int);
+// void *connection_handler(void *);
 
 int main(int argc, char *argv[]) {
-
   if (argc < 2) {
     fprintf(stderr,"ERROR, no port provided\n");
     exit(1);
@@ -22,10 +26,8 @@ int main(int argc, char *argv[]) {
   int sock_fd, newsock_fd;
   
   socklen_t clilen;
-  char buf[256];
   struct sockaddr_in server_addr; 
   struct sockaddr_in client_addr;
-  int n;
  
   if ((sock_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
     perror("Error opening socket, exiting...");
@@ -45,29 +47,81 @@ int main(int argc, char *argv[]) {
 
   listen(sock_fd, 5);
 
+
+  puts("Waiting for incoming connections...");
   clilen = sizeof(client_addr);
-  newsock_fd = accept(sock_fd, (struct sockaddr *) &client_addr, &clilen);
-  if (newsock_fd < 0) {
-    perror("Error accepting connection to socket, exiting...");
-    exit(1);
-  }
-
-  memset(buf, 0, 256);
+  pthread_t thread_id;
   
-  n = read(newsock_fd, buf, 255);
-  if (n < 0) {
-    perror("Error reading socket, exiting...");
-    exit(1);
+  while( (newsock_fd = accept(sock_fd, (struct sockaddr *)&client_addr, (socklen_t*)&clilen)) )
+  {
+      puts("Connection accepted");
+       
+      connection_handler(newsock_fd);
+      // if( pthread_create( &thread_id , NULL ,  connection_handler , (void*) &newsock_fd) < 0)
+      // {
+      //     perror("could not create thread");
+      //     return 1;
+      // }
+       
+      //Now join the thread , so that we dont terminate before the thread
+      //pthread_join( thread_id , NULL);
+      puts("Handler assigned");
   }
-  printf("Here is the message: \n%s\n", buf);
-  n = write(newsock_fd,"<html><h1>CUNT</h1></html>", 26);
-  if (n < 0) {
-    perror("Error reading socket, exiting...");
+   
+  if (newsock_fd < 0)
+  {
+      perror("accept failed");
+      return 1;
   }
-
-  close(newsock_fd);
-  close(sock_fd);
-  shutdown(newsock_fd, 2);
-  shutdown(sock_fd, 2);
   return 0; 
+}
+
+/*
+ * This will handle connection for each client
+ * */
+void *connection_handler(int newsock_fd)
+// void *connection_handler(void *socket_desc)
+{
+    int n;
+    char buf[2048];
+    memset(buf, 0, 2048);
+
+    n = read(newsock_fd, buf, 2048);
+    if (n < 0) {
+      perror("Error reading socket, exiting...");
+      exit(1);
+    }
+
+    int index = 0;
+
+    const char s[2] = " ";
+      char *token;
+       
+       /* get the first token */
+      token = strtok(buf, s);
+      token = strtok(NULL, s);
+      // token = strtok(buf, s);
+      // printf( "%s\n", token );
+ 
+       // /* walk through other tokens */
+       // while( token != NULL ) 
+       // {
+       //    printf( "%s\n", token );
+        
+       //    token = strtok(NULL, s);
+       // }
+
+
+    printf("Here is the message: \n%s\n", token);
+    n = write(newsock_fd,"I got your message",18);
+    if (n < 0) {
+      perror("Error reading socket, exiting...");
+    }
+    close(newsock_fd);
+
+    return 0;
+}
+
+void *request_handler(int newsock_fd){
+
 }
