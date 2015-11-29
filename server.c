@@ -8,10 +8,11 @@
 #include <sys/types.h> 
 #include <netinet/in.h>
 #include <pthread.h> //for threading , link with lpthread
+#include <dirent.h>
 
 //the thread function
 void *connection_handler(int);
-void *request_handler(int);
+void *request_handler(int, char*);
 // void *connection_handler(void *);
 
 int main(int argc, char *argv[]) {
@@ -55,7 +56,7 @@ int main(int argc, char *argv[]) {
   while( (newsock_fd = accept(sock_fd, (struct sockaddr *)&client_addr, (socklen_t*)&clilen)) )
   {
       puts("Connection accepted");
-       
+      
       connection_handler(newsock_fd);
       // if( pthread_create( &thread_id , NULL ,  connection_handler , (void*) &newsock_fd) < 0)
       // {
@@ -92,24 +93,23 @@ void *connection_handler(int newsock_fd)
       exit(1);
     }
 
-    int index = 0;
-
-    const char s[2] = " ";
-      char *token;
+    // const char s[2] = " ";
+    char *token;
        
-       /* get the first token */
-      token = strtok(buf, s);
-      token = strtok(NULL, s);
-      // token = strtok(buf, s);
-      // printf( "%s\n", token );
- 
-       // /* walk through other tokens */
-       // while( token != NULL ) 
-       // {
-       //    printf( "%s\n", token );
-        
-       //    token = strtok(NULL, s);
-       // }
+    token = strtok(buf, " ");
+    token = strtok(NULL, " ");
+
+    if(strcmp(token, "/favicon.ico") == 0){
+      close(newsock_fd);
+      return 0;
+    }
+    printf("REQUEST SUBMITTED: %s\n\n", token);
+    if(strstr(token, ".cgi") != NULL){
+      puts ("RUNNING SCRIPT!!!! \n");
+    }
+    else{
+      request_handler(newsock_fd, token);
+    }
 
 
     printf("Here is the message: \n%s\n", token);
@@ -122,6 +122,28 @@ void *connection_handler(int newsock_fd)
     return 0;
 }
 
-void *request_handler(int newsock_fd){
+void *request_handler(int newsock_fd, char* request){
+  DIR *dp;
+  struct dirent *ep;
 
+  char *input;
+  input = calloc(80, 1);
+
+
+  strcat(input, ".");
+  strcat(input, request);
+  printf("->>>>>> %s\n", input);
+  dp = opendir (input);
+
+  if (dp != NULL)
+  {
+    while ((ep = readdir (dp))){
+      puts (ep->d_name);
+    }
+
+    (void) closedir (dp);
+  }
+  else
+    perror ("Couldn't open the directory");
+  return 0;
 }
