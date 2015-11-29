@@ -10,6 +10,7 @@
 
 
 int main(int argc, char *argv[]) {
+
   if (argc < 2) {
     fprintf(stderr,"ERROR, no port provided\n");
     exit(1);
@@ -52,15 +53,14 @@ int main(int argc, char *argv[]) {
   }
 
   memset(buf, 0, 256);
-
+  
   n = read(newsock_fd, buf, 255);
   if (n < 0) {
     perror("Error reading socket, exiting...");
     exit(1);
   }
-
   printf("Here is the message: \n%s\n", buf);
-  n = write(newsock_fd,"I got your message",18);
+  n = write(newsock_fd,"<html><h1>CUNT</h1></html>", 26);
   if (n < 0) {
     perror("Error reading socket, exiting...");
   }
