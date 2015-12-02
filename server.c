@@ -9,10 +9,13 @@ The port number is passed as an argument */
 #include <netinet/in.h>
 #include <pthread.h> //for threading , link with lpthread
 #include <dirent.h>
+#include <sys/stat.h>
 
 //the thread function
 void *connection_handler(int);
 void *request_handler(int, char*);
+int file_type(const char*);
+// void *connection_handler(void *);
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -201,6 +204,7 @@ void *connection_handler(int newsock_fd) {
         perror("Error reading socket, exiting...");
         exit(1);
     }
+<<<<<<< HEAD
     
     // Tokenize request packet, get request token
     token = strtok(buf, " ");
@@ -227,8 +231,102 @@ void *connection_handler(int newsock_fd) {
             break;
     }
     
+=======
+
+    char *token;
+    
+    token = strtok(buf, " ");
+    token = strtok(NULL, " ");
+    
+    if(strcmp(token, "/favicon.ico") == 0){
+        close(newsock_fd);
+        return 0;
+    }
+
+    printf("REQUEST SUBMITTED: %s\n\n", token);
+    request_handler(newsock_fd, token);
+
+    printf("Here is the message: \n%s\n", token);
+    
+    n = write(newsock_fd,"I got your message",18);
+    if (n < 0) {
+        perror("Error reading socket, exiting...");
+    }
+>>>>>>> 98da198da33e535aad085ac70a3bcc620f2a7024
     close(newsock_fd);
     
     return 0;
 }
 
+<<<<<<< HEAD
+=======
+void *request_handler(int newsock_fd, char* request){
+  int type;
+  char *input;
+  input = calloc(80, 1);
+
+  strcat(input, ".");
+  strcat(input, request);
+  type = file_type(input);
+  switch(type){
+    case 0:
+      printf("directory file\n");
+      break;
+
+    case 1:
+      printf("regular (static) file\n");
+      break;
+
+    case 2:
+      printf("html file\n");
+      break;
+
+    case 3:
+      printf("cgi script\n");
+      break;
+
+    default:
+      printf("return 404\n");
+      break;
+  }
+
+
+  if (type != 0){
+    printf("do not directory stuff\n");
+  }
+  else{
+    DIR *dp;
+    struct dirent *ep;
+    dp = opendir (input);
+
+    if (dp != NULL)
+    {
+      while ((ep = readdir (dp))){
+        puts (ep->d_name);
+      }
+
+      (void) closedir (dp);
+    }
+    else {
+      perror ("Couldn't open the directory");
+    }
+  }
+  
+  return 0;
+}
+
+int file_type(const char *path) {
+  struct stat path_stat;
+
+  if( stat(path, &path_stat) < 0){ //SCOTT DEAL WITH THIS
+    return -1;
+  }
+
+  if(strstr(path, ".cgi") != NULL){
+    puts ("RUNNING SCRIPT!!!! \n");
+  }
+
+  stat(path, &path_stat);
+  return S_ISREG(path_stat.st_mode);
+}
+>>>>>>> 98da198da33e535aad085ac70a3bcc620f2a7024
