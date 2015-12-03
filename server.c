@@ -11,8 +11,8 @@ The port number is passed as an argument */
 #include <dirent.h>
 
 //the thread function
-void *connection_handler(int);
-void *request_handler(int, char*);
+void connection_handler(int);
+void request_handler(int, char*);
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
 #define STATIC_IMG 3
 #define CGI_SCRIPT 4
 
-int requestType(char *token) {
+int request_type(char *token) {
     printf("%s:%s\n", "Token", token);
     // Find pointer to last dot in token
     const char *dot = strrchr(token, '.');
@@ -116,8 +116,12 @@ int requestType(char *token) {
 
 }
 
+void return_404(){
 
-void *directory_listing(int newsock_fd, char *request) {
+}
+
+
+void directory_listing(int newsock_fd, char *request) {
     DIR *dp;
     struct dirent *ep;
     char *input;
@@ -131,19 +135,21 @@ void *directory_listing(int newsock_fd, char *request) {
     strcat(input, request);
     dp = opendir(input);
     
-    
-    if (dp != NULL) {
-        while ((ep = readdir(dp))) {
-            strcat(out_buf, ep->d_name);
-            strcat(out_buf, "\n");
-        }
-        (void) closedir(dp);
-        n = write(newsock_fd, out_buf, strlen(out_buf));
 
-        if (n < 0) {
-            perror("Error writing to client");
-        }
+    if (!dp) {
+        return404();
+    }
 
+    strcat(out_buf, "HTTP/1.1 200 OK\nContent-type: text/plain\n\n");
+    while ((ep = readdir(dp))) {
+        strcat(out_buf, ep->d_name);
+        strcat(out_buf, "\n");
+    }
+    (void) closedir(dp);
+    n = write(newsock_fd, out_buf, strlen(out_buf));
+
+    if (n < 0) {
+        perror("Error writing to client");
     }
 
     else {
@@ -186,7 +192,7 @@ int html_file(int newsock_fd, char *request) {
 }
 
 
-void *connection_handler(int newsock_fd) {
+void connection_handler(int newsock_fd) {
 
     int n;
     char buf[2048];
@@ -208,7 +214,7 @@ void *connection_handler(int newsock_fd) {
     
     // Ignore request for favicon
 
-    switch (requestType(token)) {
+    switch (request_type(token)) {
         case DIR_LIST:
             printf("%s\n", "Directory listing");
             directory_listing(newsock_fd, token);
