@@ -11,8 +11,7 @@ The port number is passed as an argument */
 #include <dirent.h>
 
 //the thread function
-void connection_handler(int);
-void request_handler(int, char*);
+int connection_handler(int);
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -116,12 +115,18 @@ int request_type(char *token) {
 
 }
 
-void return_404(){
-
+void return_404(int newsock_fd){
+    char *not_found = "HTTP/1.1 404 Not Found\nContent-type: text/html\n\n \
+        <html><head><title>404</title></head><body><h1>404 NOT FOUND</h1><img src=\"ling-mad.gif\"></body></html>";
+    int n;
+    n = write(newsock_fd, not_found, strlen(not_found));
+    if (n < 0) {
+        perror("Error writing to client");
+    }
 }
 
 
-void directory_listing(int newsock_fd, char *request) {
+int directory_listing(int newsock_fd, char *request) {
     DIR *dp;
     struct dirent *ep;
     char *input;
@@ -137,7 +142,8 @@ void directory_listing(int newsock_fd, char *request) {
     
 
     if (!dp) {
-        return404();
+        return_404(newsock_fd);
+        return -1;
     }
 
     strcat(out_buf, "HTTP/1.1 200 OK\nContent-type: text/plain\n\n");
@@ -154,7 +160,7 @@ void directory_listing(int newsock_fd, char *request) {
 
     else {
         perror("Error, couldn't open the directory");
-        return 0;
+        return -1;
     }
 
     return 0;
@@ -173,8 +179,11 @@ int html_file(int newsock_fd, char *request) {
     strcat(pathname, request);
 
     f = fopen(pathname, "r");
-    if (!f) return -1;
-
+    if (!f) {
+        return_404(newsock_fd);
+        return -1;
+    }
+    
     // Find the file size in bytes, create a buffer to fit it
     fseek(f, 0, SEEK_END);
     long fsize = ftell(f);
@@ -188,12 +197,11 @@ int html_file(int newsock_fd, char *request) {
 
     // Write buffer to socket
     n = write(newsock_fd, file_buf, fsize);
-    
+    return 0;
 }
 
 
-void connection_handler(int newsock_fd) {
-
+int connection_handler(int newsock_fd) {
     int n;
     char buf[2048];
     char *token;
@@ -230,6 +238,8 @@ void connection_handler(int newsock_fd) {
             printf("%s\n", "cgi script");
             break;
         default:
+            printf("--------------------------------\n");
+            return_404(newsock_fd);
             break;
     }
     

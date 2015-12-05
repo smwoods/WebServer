@@ -1,5 +1,5 @@
 all:
-	gcc server.c -o server
+	gcc -Wall server.c -o server
 
 clean:
 	rm server
