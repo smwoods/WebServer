@@ -9,6 +9,7 @@ The port number is passed as an argument */
 #include <netinet/in.h>
 #include <pthread.h> //for threading , link with lpthread
 #include <dirent.h>
+#include <sys/wait.h>
 
 //the thread function
 int connection_handler(int);
@@ -200,11 +201,62 @@ int html_file(int newsock_fd, char *request) {
     return 0;
 }
 
+int cgi_script(int newsock_fd, char *request) {
+    pid_t pid;
+    int status;
+    printf("%s\n", "here");
+    execl(request, (char*) 0);
+
+    // if ((pid = fork()) == 0) {
+    //     printf("%s\n", "In child");
+    //     // dup2(newsock_fd, STDOUT_FILENO);
+    //     close(newsock_fd);
+    //     printf("%s\n", "In child3");
+    //     printf("%s\n", "Running cgi script");
+    //     printf("%s\n", request);
+    //     execl(request, (char*) 0);
+    //     printf("%s\n", "after");
+    //     exit(0);
+    // }
+
+    // if (pid > 0) {
+    //   printf("%s\n", "In parent");
+    //   close(newsock_fd);
+    //   /* the parent process calls waitpid() on the child */
+    //   if (waitpid(pid, &status, 0) > 0) {
+    //     if (WIFEXITED(status) && !WEXITSTATUS(status)) {
+    //        the program terminated normally and executed successfully 
+    //         printf("%s\n", "success");
+    //     } 
+    //     else if (WIFEXITED(status) && WEXITSTATUS(status)) {
+    //       if (WEXITSTATUS(status) == 127) {
+    //         printf("%s\n", "failure ");
+    //         /* execl() failed */
+    //       }
+    //       else {
+    //         /* the program terminated normally, but returned a non-zero status */
+    //         printf("%s\n", "fuck");
+    //       }
+    //     } 
+    //     else {
+    //       /* the program didn't terminate normally */
+    //         printf("%s\n", "double fuck");
+    //     }
+    //   }
+    //   else {
+    //     /* waitpid() failed */
+    //   }
+    // }
+    // else {
+    //   /* failed to fork() */
+    // }
+}
+
 
 int connection_handler(int newsock_fd) {
     int n;
     char buf[2048];
-    char *token;
+    char *temp;
     
     // Fill buffer with zeros
     memset(buf, 0, 2048);
@@ -217,9 +269,14 @@ int connection_handler(int newsock_fd) {
     }
     
     // Tokenize request packet, get request token
-    token = strtok(buf, " ");
-    token = strtok(NULL, " ");
-    
+    printf("%s\n", "HERE");
+    temp = strtok(buf, " ");
+    temp = strtok(NULL, " ");
+    char token[strlen(temp)+1];
+    strcat(token, ".");
+    strcat(token, temp);
+    printf("%s\n", "HURHR");
+
     // Ignore request for favicon
 
     switch (request_type(token)) {
@@ -236,6 +293,7 @@ int connection_handler(int newsock_fd) {
             break;
         case CGI_SCRIPT:
             printf("%s\n", "cgi script");
+            cgi_script(newsock_fd, token);
             break;
         default:
             printf("--------------------------------\n");
