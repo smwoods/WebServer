@@ -158,17 +158,11 @@ void return_404(int newsock_fd){
 int directory_listing(int newsock_fd, char *request) {
     DIR *dp;
     struct dirent *ep;
-    char *input;
     char out_buf[2048];
     int n;
 
-    input = calloc(255, 1);
     memset(out_buf, 0, 2048);
-    
-    strcat(input, ".");
-    strcat(input, request);
-    dp = opendir(input);
-    
+    dp = opendir(request);
 
     if (!dp) {
         return_404(newsock_fd);
@@ -206,15 +200,12 @@ void response(void *message, int msglen, int newsock_fd)
 
 int image_file(int newsock_fd, char *file_path, int type){ //REWRITE THIS CODE 
     FILE *fp;
-    char *pathname, *buf, header[1024], *file_type;
+    char *buf, header[1024], *file_type;
     int fsize, hsize, nbytes;
     
     file_type = calloc(4, 1);
-    pathname = calloc(255, 1);
-    strcat(pathname, ".");
-    strcat(pathname, file_path);
 
-    fp = fopen(pathname, "r");
+    fp = fopen(file_path, "r");
     if (!fp) {
         return_404(newsock_fd);
         return -1;
@@ -247,18 +238,11 @@ int image_file(int newsock_fd, char *file_path, int type){ //REWRITE THIS CODE
 }
 
 int html_file(int newsock_fd, char *request) {
-    char *pathname;
     char *file_buf;
     FILE *f;
     int n;
 
-    pathname = calloc(255, 1);
-
-    // Get the relative path and open the file
-    strcat(pathname, ".");
-    strcat(pathname, request);
-
-    f = fopen(pathname, "r");
+    f = fopen(request, "r");
     if (!f) {
         return_404(newsock_fd);
         return -1;
@@ -335,7 +319,7 @@ int cgi_script(int newsock_fd, char *request) {
 int connection_handler(int newsock_fd) {
     int n;
     char buf[2048];
-    char *token;
+    char *token, *pathname;
     
     // Fill buffer with zeros
     memset(buf, 0, 2048);
@@ -347,29 +331,32 @@ int connection_handler(int newsock_fd) {
         exit(1);
     }
     
-    // Tokenize request packet, get request token
+    // Tokenize request packet, get request token, and add a period
     token = strtok(buf, " ");
     token = strtok(NULL, " ");
+    pathname = calloc(255, 1);
+    strcat(pathname, ".");
+    strcat(pathname, token);
     
     // Ignore request for favicon
     int file_type;
-    switch (file_type = request_type(token)) {
+    switch (file_type = request_type(pathname)) {
         case DIR_LIST:
             printf("%s\n", "Directory listing");
-            directory_listing(newsock_fd, token);
+            directory_listing(newsock_fd, pathname);
             break;
         case HTML_FILE:
             printf("%s\n", "html file");
-            html_file(newsock_fd, token);
+            html_file(newsock_fd, pathname);
             break;
         case IMAGE_GIF:
         case IMAGE_JPEG:
             printf("%s\n", "static image");
-            image_file(newsock_fd, token, file_type);
+            image_file(newsock_fd, pathname, file_type);
             break;
         case CGI_SCRIPT:
             printf("%s\n", "cgi script");
-            cgi_script(newsock_fd, token);
+            cgi_script(newsock_fd, pathname);
             break;
         default:
             printf("--------------------------------\n");
