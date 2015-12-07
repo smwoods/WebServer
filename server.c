@@ -15,9 +15,34 @@ The port number is passed as an argument */
 int connection_handler(int);
 
 int main(int argc, char *argv[]) {
+    int webcache, multithreading;
+    webcache = 0;
+    multithreading = 0;
+
     if (argc < 2) {
         fprintf(stderr,"Error, no port provided.");
         exit(1);
+    }
+    if (argc > 2){
+        if(strcmp(argv[2], "multi") == 0){
+            multithreading = 1;
+        } else if(strcmp(argv[2], "cache") == 0){
+            webcache = 1;
+        }
+        if(argc > 3){
+            if(strcmp(argv[3], "cache") == 0){
+                webcache = 1;
+            }
+            else if(strcmp(argv[3], "multi") == 0){
+                multithreading = 1;
+            }
+        }
+    }
+    if(webcache == 1){
+        printf("Web cache initiated!!\n");
+    }
+    if(multithreading == 1){
+        printf("multithreading initiated!\n");
     }
     
     int port;
@@ -83,10 +108,13 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-#define DIR_LIST 1
-#define HTML_FILE 2
-#define STATIC_IMG 3
-#define CGI_SCRIPT 4
+#define DIR_LIST    1
+#define HTML_FILE   2
+#define CGI_SCRIPT  3
+#define IMAGE_JPEG  4
+#define IMAGE_GIF   5
+
+
 
 int request_type(char *token) {
     printf("%s:%s\n", "Token", token);
@@ -100,11 +128,11 @@ int request_type(char *token) {
     if (strcmp(dot, ".html") == 0)
         return HTML_FILE;
     else if (strcmp(dot, ".jpg") == 0)
-        return STATIC_IMG;
+        return IMAGE_JPEG;
     else if (strcmp(dot, ".jpeg") == 0)
-        return STATIC_IMG;
+        return IMAGE_JPEG;
     else if (strcmp(dot, ".gif") == 0)
-        return STATIC_IMG;
+        return IMAGE_GIF;
     else if (strcmp(dot, ".cgi") == 0)
         return CGI_SCRIPT;
     else if (strcmp(dot, ".ico") == 0)
@@ -118,7 +146,7 @@ int request_type(char *token) {
 
 void return_404(int newsock_fd){
     char *not_found = "HTTP/1.1 404 Not Found\nContent-type: text/html\n\n \
-        <html><head><title>404</title></head><body><h1>404 NOT FOUND</h1><img src=\"ling-mad.gif\"></body></html>";
+        <html><head><title>404</title></head><body><h1>404 NOT FOUND</h1></body></html>";
     int n;
     n = write(newsock_fd, not_found, strlen(not_found));
     if (n < 0) {
@@ -159,10 +187,61 @@ int directory_listing(int newsock_fd, char *request) {
         perror("Error writing to client");
     }
 
-    else {
-        perror("Error, couldn't open the directory");
+    return 0;
+}
+
+
+void response(void *message, int msglen, int newsock_fd)
+{
+    char *msg = (char*) message;
+
+    while (msglen > 0)
+    {
+         int len = write(newsock_fd, msg, msglen);
+         if (len <= 0) return;
+         msg += len;
+         msglen -= len;
+    }
+}
+
+int image_file(int newsock_fd, char *file_path, int type){ //REWRITE THIS CODE 
+    FILE *fp;
+    char *pathname, *buf, header[1024], *file_type;
+    int fsize, hsize, nbytes;
+    
+    file_type = calloc(4, 1);
+    pathname = calloc(255, 1);
+    strcat(pathname, ".");
+    strcat(pathname, file_path);
+
+    fp = fopen(pathname, "r");
+    if (!fp) {
+        return_404(newsock_fd);
         return -1;
     }
+
+    fseek(fp, 0, SEEK_END);
+    fsize = ftell(fp);
+    rewind(fp);
+
+    //Get correct file type for the header
+    if(type == IMAGE_JPEG){
+        file_type = "jpeg";
+    }else{
+        file_type = "gif";
+    }
+
+    hsize = sprintf(header, "HTTP/1.1 200 OK\r\n"
+                            "Content-Length: %d\r\n"
+                            "Content-Type: image/%s\r\n\n", fsize, file_type);
+
+    write(newsock_fd, header, hsize);
+
+    buf = (char*)malloc(4096);
+    while((nbytes = fread(buf, sizeof(char), 4096, fp)) > 0){
+        write(newsock_fd, buf, nbytes);
+    }
+    free(buf);
 
     return 0;
 }
@@ -278,8 +357,8 @@ int connection_handler(int newsock_fd) {
     printf("%s\n", "HURHR");
 
     // Ignore request for favicon
-
-    switch (request_type(token)) {
+    int file_type;
+    switch (file_type = request_type(token)) {
         case DIR_LIST:
             printf("%s\n", "Directory listing");
             directory_listing(newsock_fd, token);
@@ -288,8 +367,10 @@ int connection_handler(int newsock_fd) {
             printf("%s\n", "html file");
             html_file(newsock_fd, token);
             break;
-        case STATIC_IMG:
+        case IMAGE_GIF:
+        case IMAGE_JPEG:
             printf("%s\n", "static image");
+            image_file(newsock_fd, token, file_type);
             break;
         case CGI_SCRIPT:
             printf("%s\n", "cgi script");
@@ -305,4 +386,3 @@ int connection_handler(int newsock_fd) {
     
     return 0;
 }
-
