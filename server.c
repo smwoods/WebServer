@@ -335,7 +335,7 @@ int cgi_script(int newsock_fd, char *request) {
 int connection_handler(int newsock_fd) {
     int n;
     char buf[2048];
-    char *temp;
+    char *token;
     
     // Fill buffer with zeros
     memset(buf, 0, 2048);
@@ -348,14 +348,9 @@ int connection_handler(int newsock_fd) {
     }
     
     // Tokenize request packet, get request token
-    printf("%s\n", "HERE");
-    temp = strtok(buf, " ");
-    temp = strtok(NULL, " ");
-    char token[strlen(temp)+1];
-    strcat(token, ".");
-    strcat(token, temp);
-    printf("%s\n", "HURHR");
-
+    token = strtok(buf, " ");
+    token = strtok(NULL, " ");
+    
     // Ignore request for favicon
     int file_type;
     switch (file_type = request_type(token)) {
