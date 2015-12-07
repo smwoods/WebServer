@@ -283,52 +283,50 @@ int html_file(int newsock_fd, char *request) {
 int cgi_script(int newsock_fd, char *request) {
     pid_t pid;
     int status;
-    printf("%s\n", "here");
-    execl(request, (char*) 0);
+    char *pathname;
 
-    // if ((pid = fork()) == 0) {
-    //     printf("%s\n", "In child");
-    //     // dup2(newsock_fd, STDOUT_FILENO);
-    //     close(newsock_fd);
-    //     printf("%s\n", "In child3");
-    //     printf("%s\n", "Running cgi script");
-    //     printf("%s\n", request);
-    //     execl(request, (char*) 0);
-    //     printf("%s\n", "after");
-    //     exit(0);
-    // }
+    pathname = calloc(255, 1);
+    strcat(pathname, ".");
+    strcat(pathname, request);
 
-    // if (pid > 0) {
-    //   printf("%s\n", "In parent");
-    //   close(newsock_fd);
-    //   /* the parent process calls waitpid() on the child */
-    //   if (waitpid(pid, &status, 0) > 0) {
-    //     if (WIFEXITED(status) && !WEXITSTATUS(status)) {
-    //        the program terminated normally and executed successfully 
-    //         printf("%s\n", "success");
-    //     } 
-    //     else if (WIFEXITED(status) && WEXITSTATUS(status)) {
-    //       if (WEXITSTATUS(status) == 127) {
-    //         printf("%s\n", "failure ");
-    //         /* execl() failed */
-    //       }
-    //       else {
-    //         /* the program terminated normally, but returned a non-zero status */
-    //         printf("%s\n", "fuck");
-    //       }
-    //     } 
-    //     else {
-    //       /* the program didn't terminate normally */
-    //         printf("%s\n", "double fuck");
-    //     }
-    //   }
-    //   else {
-    //     /* waitpid() failed */
-    //   }
-    // }
-    // else {
-    //   /* failed to fork() */
-    // }
+    if ((pid = fork()) == 0) {
+        dup2(newsock_fd, STDOUT_FILENO);
+        close(newsock_fd);
+        execl(pathname, (char*) 0);
+        exit(0);
+    }
+
+    if (pid > 0) {
+      printf("%s\n", "In parent");
+      close(newsock_fd);
+      /* the parent process calls waitpid() on the child */
+      if (waitpid(pid, &status, 0) > 0) {
+        if (WIFEXITED(status) && !WEXITSTATUS(status)) {
+           // the program terminated normally and executed successfully 
+            printf("%s\n", "success");
+        } 
+        else if (WIFEXITED(status) && WEXITSTATUS(status)) {
+          if (WEXITSTATUS(status) == 127) {
+            printf("%s\n", "failure ");
+            /* execl() failed */
+          }
+          else {
+            /* the program terminated normally, but returned a non-zero status */
+            printf("%s\n", "fuck");
+          }
+        } 
+        else {
+          /* the program didn't terminate normally */
+            printf("%s\n", "double fuck");
+        }
+      }
+      else {
+        /* waitpid() failed */
+      }
+    }
+    else {
+      /* failed to fork() */
+    }
 }
 
 
