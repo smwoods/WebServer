@@ -180,114 +180,8 @@ void return_404(int newsock_fd){
     }
 }
 
-int directory_listing(int newsock_fd, char *request) {
-    DIR *dp;
-    struct dirent *ep;
-    char out_buf[2048];
-    int n;
-
-    memset(out_buf, 0, 2048);
-    dp = opendir(request);
-
-    if (!dp) {
-        return_404(newsock_fd);
-        return -1;
-    }
-
-    strcat(out_buf, "HTTP/1.1 200 OK\nContent-type: text/plain\n\n");
-    while ((ep = readdir(dp))) {
-        strcat(out_buf, ep->d_name);
-        strcat(out_buf, "\n");
-    }
-    (void) closedir(dp);
-    n = write(newsock_fd, out_buf, strlen(out_buf));
-
-    if (n < 0) {
-        perror("Error writing to client");
-    }
-
-    return 0;
-}
 
 
-void response(void *message, int msglen, int newsock_fd)
-{
-    char *msg = (char*) message;
-
-    while (msglen > 0)
-    {
-         int len = write(newsock_fd, msg, msglen);
-         if (len <= 0) return;
-         msg += len;
-         msglen -= len;
-    }
-}
-
-int image_file(int newsock_fd, char *file_path, int type){ //REWRITE THIS CODE 
-    FILE *fp;
-    char *buf, header[1024], *file_type;
-    int fsize, hsize, nbytes;
-    
-    file_type = calloc(4, 1);
-
-    fp = fopen(file_path, "r");
-    if (!fp) {
-        return_404(newsock_fd);
-        return -1;
-    }
-
-    fseek(fp, 0, SEEK_END);
-    fsize = ftell(fp);
-    rewind(fp);
-
-    //Get correct file type for the header
-    if(type == IMAGE_JPEG){
-        file_type = "jpeg";
-    }else{
-        file_type = "gif";
-    }
-
-    hsize = sprintf(header, "HTTP/1.1 200 OK\r\n"
-                            "Content-Length: %d\r\n"
-                            "Content-Type: image/%s\r\n\n", fsize, file_type);
-
-    write(newsock_fd, header, hsize);
-
-    buf = (char*)malloc(4096);
-    while((nbytes = fread(buf, sizeof(char), 4096, fp)) > 0){
-        write(newsock_fd, buf, nbytes);
-    }
-    free(buf);
-
-    return 0;
-}
-
-int html_file(int newsock_fd, char *request) {
-    char *file_buf;
-    FILE *f;
-    int n;
-
-    f = fopen(request, "r");
-    if (!f) {
-        return_404(newsock_fd);
-        return -1;
-    }
-    
-    // Find the file size in bytes, create a buffer to fit it
-    fseek(f, 0, SEEK_END);
-    long fsize = ftell(f);
-    fseek(f, 0, SEEK_SET);
-    file_buf = malloc(fsize + 1);
-
-    // Fill buffer from file, null terminate, and close file
-    fread(file_buf, fsize, 1, f);
-    file_buf[fsize] = 0;
-    fclose(f);
-
-    // Write buffer to socket
-    n = write(newsock_fd, file_buf, fsize);
-    return 0;
-}
 
 int cgi_script(int newsock_fd, char *request) {
 
@@ -412,6 +306,161 @@ int cgi_script(int newsock_fd, char *request) {
 
     return 0;
 }
+
+int directory_listing(int newsock_fd, char *request) {
+    pid_t pid;
+    int status;
+
+    char *const arguments[2] = {"directorylisting.cgi", request};
+    printf("%s\n", "IN DIR LISTING");
+    if ((pid = fork()) == 0) {
+        dup2(newsock_fd, STDOUT_FILENO);
+        close(newsock_fd);
+        execv("./example_dir/directorylisting.cgi", arguments);
+        exit(-1);
+    }
+
+
+    if (pid > 0) {
+      // printf("%s\n", "In parent");
+      close(newsock_fd);
+      /* the parent process calls waitpid() on the child */
+      if (waitpid(pid, &status, 0) > 0) {
+        if (WIFEXITED(status) && !WEXITSTATUS(status)) {
+           printf("%s\n", "success!");
+        } 
+        else if (WIFEXITED(status) && WEXITSTATUS(status)) {
+          if (WEXITSTATUS(status) == -1) {
+            printf("%s\n", "Exec failure");
+            /* execl() failed */
+          }
+          else {
+            printf("%s\n", "Child process returning nonzero");
+          }
+        } 
+        else {
+            printf("%s\n", "Error in child process");
+        }
+      }
+      else {
+        printf("%s\n", "Waitpid failed");
+      }
+    }
+
+    else {
+      printf("%s\n", "Fork failed");
+    }
+
+
+    // DIR *dp;
+    // struct dirent *ep;
+    // char out_buf[2048];
+    // int n;
+
+    // memset(out_buf, 0, 2048);
+    // dp = opendir(request);
+
+    // if (!dp) {
+    //     return_404(newsock_fd);
+    //     return -1;
+    // }
+
+    // strcat(out_buf, "HTTP/1.1 200 OK\nContent-type: text/plain\n\n");
+    // while ((ep = readdir(dp))) {
+    //     strcat(out_buf, ep->d_name);
+    //     strcat(out_buf, "\n");
+    // }
+    // (void) closedir(dp);
+    // n = write(newsock_fd, out_buf, strlen(out_buf));
+
+    // if (n < 0) {
+    //     perror("Error writing to client");
+    // }
+
+    return 0;
+}
+
+
+void response(void *message, int msglen, int newsock_fd)
+{
+    char *msg = (char*) message;
+
+    while (msglen > 0)
+    {
+         int len = write(newsock_fd, msg, msglen);
+         if (len <= 0) return;
+         msg += len;
+         msglen -= len;
+    }
+}
+
+int image_file(int newsock_fd, char *file_path, int type){ //REWRITE THIS CODE 
+    FILE *fp;
+    char *buf, header[1024], *file_type;
+    int fsize, hsize, nbytes;
+    
+    file_type = calloc(4, 1);
+
+    fp = fopen(file_path, "r");
+    if (!fp) {
+        return_404(newsock_fd);
+        return -1;
+    }
+
+    fseek(fp, 0, SEEK_END);
+    fsize = ftell(fp);
+    rewind(fp);
+
+    //Get correct file type for the header
+    if(type == IMAGE_JPEG){
+        file_type = "jpeg";
+    }else{
+        file_type = "gif";
+    }
+
+    hsize = sprintf(header, "HTTP/1.1 200 OK\r\n"
+                            "Content-Length: %d\r\n"
+                            "Content-Type: image/%s\r\n\n", fsize, file_type);
+
+    write(newsock_fd, header, hsize);
+
+    buf = (char*)malloc(4096);
+    while((nbytes = fread(buf, sizeof(char), 4096, fp)) > 0){
+        write(newsock_fd, buf, nbytes);
+    }
+    free(buf);
+
+    return 0;
+}
+
+int html_file(int newsock_fd, char *request) {
+    char *file_buf;
+    FILE *f;
+    int n;
+
+    f = fopen(request, "r");
+    if (!f) {
+        return_404(newsock_fd);
+        return -1;
+    }
+    
+    // Find the file size in bytes, create a buffer to fit it
+    fseek(f, 0, SEEK_END);
+    long fsize = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    file_buf = malloc(fsize + 1);
+
+    // Fill buffer from file, null terminate, and close file
+    fread(file_buf, fsize, 1, f);
+    file_buf[fsize] = 0;
+    fclose(f);
+
+    // Write buffer to socket
+    n = write(newsock_fd, file_buf, fsize);
+    return 0;
+}
+
+
 
 
 int connection_handler(int newsock_fd) {
