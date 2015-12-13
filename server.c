@@ -318,52 +318,46 @@ int cgi_script(int newsock_fd, char *request) {
     if ((pid = fork()) == 0) {
         dup2(newsock_fd, STDOUT_FILENO);
         close(newsock_fd);
-<<<<<<< HEAD
-        if(strstr(request, "my-histogram")){
+
+        if (strstr(request, "my-histogram")) {
             char params[10][70];
             int counter = 1;
             strcpy(params[0], "my-histogram");
             char *argvals = strstr(request, "?");
-            while(argvals[0] != '\0'){
+            while (argvals[0] != '\0') {
                 char *e;
                 int index;
 
                 strcpy(params[counter], argvals+1);
-                if(strchr(params[counter], '&') != NULL){
+                if (strchr(params[counter], '&') != NULL) {
                     e = strchr(params[counter], '&');
                     index = (int)(e - params[counter]);
                     params[counter][index] = '\0';
                 }
-                if(strstr(argvals+1, "&") != NULL){
+                if (strstr(argvals+1, "&") != NULL) {
                     argvals = strstr(argvals+1, "&");
-                }else{
+                }
+                else {
                     argvals[0] = '\0';
                 }
                 counter++;
             }
             // printf("nogger.\n");
-            while(counter < 8){
+            while (counter < 8) {
                 // printf("PARAMS %d is %s\n", counter, params[counter]);
                 strcpy(params[counter], "");
                 counter++;
             }
             // printf("COUNTER IS \"%d\"\n", counter);
             char *const arguments[8] = {params[0], params[1], params[2], params[3], params[4], params[5], params[6], NULL};
-            // int nn;
-            // for(nn = 0; nn< 8; nn++){
-            //     printf("argument %d: \"%s\"\n", nn, arguments[nn]);
-            // }
+
             execv("./my-histogram", arguments); //params
             exit(0);
-        }else{
+        }
+        else{
             execl(request, (char*) 0);
             exit(0);
         }
-=======
-        execl(request, (char*) 0);
-        exit(-1);
-
->>>>>>> 3ee3f1d73661d81d83359db2f40ff41fff16a8e4
     }
 
     if (pid > 0) {
@@ -376,20 +370,6 @@ int cgi_script(int newsock_fd, char *request) {
             // printf("%s\n", "success!");
         } 
         else if (WIFEXITED(status) && WEXITSTATUS(status)) {
-<<<<<<< HEAD
-          if (WEXITSTATUS(status) == 127) {
-            printf("%s\n", "SERVER.C ERROR: LINE 356.");
-            /* execl() failed */
-          }
-          else {
-            /* the program terminated normally, but returned a non-zero status */
-            printf("%s\n", "SERVER.C ERROR: LINE 361.");
-          }
-        } 
-        else {
-          /* the program didn't terminate normally */
-            printf("%s\n", "SERVER.C ERROR: LINE 366.");
-=======
           if (WEXITSTATUS(status) == -1) {
             printf("%s\n", "Exec failure");
             /* execl() failed */
@@ -400,7 +380,6 @@ int cgi_script(int newsock_fd, char *request) {
         } 
         else {
             printf("%s\n", "Error in child process");
->>>>>>> 3ee3f1d73661d81d83359db2f40ff41fff16a8e4
         }
       }
       else {
