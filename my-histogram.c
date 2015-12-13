@@ -12,7 +12,7 @@ typedef struct keyword {
 } keyword;
 
 int match(const char *string, char *pattern){
-    int    status;
+    int status;
     regex_t    re;
 
     if (regcomp(&re, pattern, REG_EXTENDED|REG_NOSUB) != 0) {
@@ -46,13 +46,12 @@ char* itoa(int i, char b[]){
     return b;
 }
 
-int file_exist (char *filename)
-{
+int file_exist (char *filename) {
   struct stat   buffer;   
   return (stat (filename, &buffer) == 0);
 }
 
-int num_occurences(char *string, char *substring){
+int num_occurences(char *string, char *substring) {
     int total=0;
     while ( (string=strstr(string,substring)) != NULL ){
         total++;
@@ -61,7 +60,7 @@ int num_occurences(char *string, char *substring){
     return total;
 }
 
-int find_max_padding(keyword *array, int argc){
+int find_max_padding(keyword *array, int argc) {
     int a, max;
     max = 0;
     for( a = 2; a < argc; a = a + 1 ){
@@ -116,10 +115,6 @@ int cgi_script(char *path, char *const arguments[]) {
 
 int main(int argc, char *argv[]) {
 
-    // ////////////////////////////////////////
-    // printf("NOGGERR!!!!!!NOGGERR!!!!!!\n");
-    // return 0;
-    // ////////////////////////////////////////
     int max_padding, webcache, multithreading;
     FILE *subject_file, *dat_file;
     char *gnu_name, *image_name, *data_name;
