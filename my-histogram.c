@@ -3,12 +3,28 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <regex.h>
+
 
 typedef struct keyword {
     int argv_index;
     int occurences;
 } keyword;
 
+int match(const char *string, char *pattern){
+    int    status;
+    regex_t    re;
+
+    if (regcomp(&re, pattern, REG_EXTENDED|REG_NOSUB) != 0) {
+        return(0);      /* Report error. */
+    }
+    status = regexec(&re, string, (size_t) 0, NULL, 0);
+    regfree(&re);
+    if (status != 0) {
+        return(0);      /* Report error. */
+    }
+    return(1);
+}
 
 char* itoa(int i, char b[]){
     char const digit[] = "0123456789";
@@ -56,41 +72,34 @@ int find_max_padding(keyword *array, int argc){
     return max + (max/2);
 }
 
-int cgi_script(char *request, char *parameters) {
+int cgi_script(char *path, char *const arguments[]) {
     pid_t pid;
     int status;
 
-    char *envp[] = { NULL };
-    char *argv[] = { request, parameters };
-
     if ((pid = fork()) == 0) {
-        execve(request, argv, envp);
-        // execl(request, (char*) 0);
+        execv(path, arguments);
         exit(0);
     }
 
     if (pid > 0) {
-      printf("%s\n", "In parent");
-      // close(newsock_fd);
       /* the parent process calls waitpid() on the child */
       if (waitpid(pid, &status, 0) > 0) {
         if (WIFEXITED(status) && !WEXITSTATUS(status)) {
            // the program terminated normally and executed successfully 
-            printf("%s\n", "success");
         } 
         else if (WIFEXITED(status) && WEXITSTATUS(status)) {
           if (WEXITSTATUS(status) == 127) {
-            printf("%s\n", "failure ");
+            printf("%s\n", "ERROR: execl() failed.");
             /* execl() failed */
           }
           else {
             /* the program terminated normally, but returned a non-zero status */
-            printf("%s\n", "fuck");
+            printf("%s\n", "ERROR: Program terminated normally, but returned a non-zero status.");
           }
         } 
         else {
           /* the program didn't terminate normally */
-            printf("%s\n", "double fuck");
+            printf("%s\n", "ERROR: Program failed to terminate normally.");
         }
       }
       else {
@@ -106,6 +115,11 @@ int cgi_script(char *request, char *parameters) {
 
 
 int main(int argc, char *argv[]) {
+
+    // ////////////////////////////////////////
+    // printf("NOGGERR!!!!!!NOGGERR!!!!!!\n");
+    // return 0;
+    // ////////////////////////////////////////
     int max_padding, webcache, multithreading;
     FILE *subject_file, *dat_file;
     char *gnu_name, *image_name, *data_name;
@@ -135,7 +149,7 @@ int main(int argc, char *argv[]) {
     char line[256], buffer[10];
 
     int a;
-    keyword karray[20];
+    keyword karray[10];
     //Initialize the array to have counters set to zero
     for( a = 2; a < argc; a = a + 1 ){
         karray[a-2].argv_index = a;
@@ -144,7 +158,9 @@ int main(int argc, char *argv[]) {
 
     while (fgets(line, sizeof(line), subject_file)) {
             for( a = 2; a < argc; a = a + 1 ){
-                karray[a-2].occurences += num_occurences(line, argv[a]);
+                if(strcmp(argv[a],"") != 0){
+                    karray[a-2].occurences += num_occurences(line, argv[a]);
+                }
             }
     }
 
@@ -173,21 +189,21 @@ int main(int argc, char *argv[]) {
     for( a = 2; a < argc; a = a + 1 ){
         fprintf(dat_file, "%d %s %d\n", a-2, argv[a], karray[a-2].occurences);
     }
+
+    fclose(dat_file);
+
+
+    char *const arguments[3] = {"gnuplot.cgi", argv[1], buffer};
+
+    cgi_script("./gnuplot.cgi", arguments);
+
+
+    // system(gnu_name);
     
-    max_padding = find_max_padding(karray, argc);
     printf("<html><head><style>body {font-size: 16px;}h1 {color: red;text-align: center;} \
         IMG.center{display: block; margin-left: auto; margin-right: auto;}</style> \
         <title>CS410 Webserver</title></head><body><h1> CS410 Webserver <br></h1><img class=\"center\" \
          src=\"%s\"></body></html>", image_name);
- 
-    fclose(dat_file);
-
-    // cgi_script("./gnuplot", gnu_name);
-    system(gnu_name); // <---- FIX!!!!
-
-    /* may check feof here to make a difference between eof and io failure -- network
-       timeout for instance */
-
 
     return 0;
 }

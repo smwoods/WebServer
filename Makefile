@@ -3,3 +3,9 @@ all:
 
 clean:
 	rm server && rm my-histogram
+
+nogger:
+	gcc -Wall nogger.c -o nogger
+
+cnogger:
+	rm nogger
