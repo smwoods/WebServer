@@ -9,14 +9,26 @@ The port number is passed as an argument */
 #include <netinet/in.h>
 #include <pthread.h> //for threading , link with lpthread
 #include <dirent.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
+
+#define DIR_LIST    1
+#define HTML_FILE   2
+#define CGI_SCRIPT  3
+#define IMAGE_JPEG  4
+#define IMAGE_GIF   5
+
+int webcache, multithreading;
 
 //the thread function
 int connection_handler(int);
 
 int main(int argc, char *argv[]) {
+<<<<<<< HEAD
 
     int webcache, multithreading;
+=======
+>>>>>>> f09fd00b23e71d5bb04b782a186c1e92753612a9
     webcache = 0;
     multithreading = 0;
 
@@ -109,13 +121,11 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-#define DIR_LIST    1
-#define HTML_FILE   2
-#define CGI_SCRIPT  3
-#define IMAGE_JPEG  4
-#define IMAGE_GIF   5
-
-
+int file_exist (char *filename)
+{
+  struct stat   buffer;   
+  return (stat (filename, &buffer) == 0);
+}
 
 int request_type(char *token) {
     printf("%s:%s\n", "Token", token);
@@ -155,6 +165,12 @@ void return_404(int newsock_fd){
     }
 }
 
+// int gnuplot_script(){
+    
+//     "<html><head><style>body {font-size: 16px;}h1 {color: red;text-align: center;} </style>
+//         <title>CS410 Webserver</title></head><body><h1> CS410 Webserver <br><br></h1>
+//         <img src=\"output.gif\"></body></html>"
+// }
 
 int directory_listing(int newsock_fd, char *request) {
     DIR *dp;
@@ -269,11 +285,42 @@ int cgi_script(int newsock_fd, char *request) {
     pid_t pid;
     int status;
 
+    char *image_name, *data_name;
+
+    //check if that image exists. if so, delete it to ensure it's dynamically created again
+    image_name = calloc(255, 1);
+    strcat(image_name, "./img_dir/");
+    strcat(image_name, request);
+    strcat(image_name, "-output.gif");
+
+    // printf("multithreading is %d\n", multithreading);
+    data_name = calloc(255, 1);
+    strcat(data_name, "./data_dir/");
+    strcat(data_name, request);
+    strcat(data_name, "-data.dat");
+
+    if(webcache == 0){
+        if (file_exist(image_name)){
+            if(remove(image_name) != 0){
+                printf("Issue removing %s.. will now abort.\n", image_name);
+                return -1;
+            }
+        }
+        if (file_exist(data_name)){
+            if(remove(data_name) != 0){
+                printf("Issue removing %s.. will now abort.\n", data_name);
+                return -1;
+            }
+        }
+    }
+
+
     if ((pid = fork()) == 0) {
         dup2(newsock_fd, STDOUT_FILENO);
         close(newsock_fd);
         execl(request, (char*) 0);
         exit(-1);
+
     }
 
     if (pid > 0) {
@@ -283,7 +330,7 @@ int cgi_script(int newsock_fd, char *request) {
       if (waitpid(pid, &status, 0) > 0) {
         if (WIFEXITED(status) && !WEXITSTATUS(status)) {
            // the program terminated normally and executed successfully 
-            printf("%s\n", "success");
+            printf("%s\n", "success!");
         } 
         else if (WIFEXITED(status) && WEXITSTATUS(status)) {
           if (WEXITSTATUS(status) == -1) {
@@ -305,6 +352,12 @@ int cgi_script(int newsock_fd, char *request) {
     else {
       printf("%s\n", "Fork failed");
     }
+
+    printf("GOT HERE NOW!!");
+    if (file_exist(image_name)){
+        printf("THIS WAS A GNUSCRIPT!\n");
+    }
+    return 0;
 }
 
 
