@@ -25,6 +25,11 @@ char cachesize[10];
 int connection_handler(int);
 
 int main(int argc, char *argv[]) {
+<<<<<<< HEAD
+=======
+
+    int webcache, multithreading;
+>>>>>>> 21c1988... merge
     webcache = 0;
     multithreading = 0;
 
@@ -282,6 +287,7 @@ int cgi_script(int newsock_fd, char *request) {
 
     pid_t pid;
     int status;
+<<<<<<< HEAD
     char *image_name, *data_name;
 
     //check if that image exists. if so, delete it to ensure it's dynamically created again!
@@ -309,10 +315,13 @@ int cgi_script(int newsock_fd, char *request) {
             }
         }
     }
+=======
+>>>>>>> 21c1988... merge
 
     if ((pid = fork()) == 0) {
         dup2(newsock_fd, STDOUT_FILENO);
         close(newsock_fd);
+<<<<<<< HEAD
         if(strstr(request, "my-histogram")){
             char params[10][70];
             int counter = 1;
@@ -353,6 +362,10 @@ int cgi_script(int newsock_fd, char *request) {
             execl(request, (char*) 0);
             exit(0);
         }
+=======
+        execl(request, (char*) 0);
+        exit(-1);
+>>>>>>> 21c1988... merge
     }
 
     if (pid > 0) {
@@ -365,6 +378,7 @@ int cgi_script(int newsock_fd, char *request) {
             // printf("%s\n", "success!");
         } 
         else if (WIFEXITED(status) && WEXITSTATUS(status)) {
+<<<<<<< HEAD
           if (WEXITSTATUS(status) == 127) {
             printf("%s\n", "SERVER.C ERROR: LINE 356.");
             /* execl() failed */
@@ -377,14 +391,26 @@ int cgi_script(int newsock_fd, char *request) {
         else {
           /* the program didn't terminate normally */
             printf("%s\n", "SERVER.C ERROR: LINE 366.");
+=======
+          if (WEXITSTATUS(status) == -1) {
+            printf("%s\n", "Exec failure");
+            /* execl() failed */
+          }
+          else {
+            printf("%s\n", "Child process returning nonzero");
+          }
+        } 
+        else {
+            printf("%s\n", "Error in child process");
+>>>>>>> 21c1988... merge
         }
       }
       else {
-        /* waitpid() failed */
+        printf("%s\n", "Waitpid failed");
       }
     }
     else {
-      /* failed to fork() */
+      printf("%s\n", "Fork failed");
     }
 
     return 0;
@@ -438,7 +464,6 @@ int connection_handler(int newsock_fd) {
             return_404(newsock_fd);
             break;
     }
-    
     close(newsock_fd);
     
     return 0;
