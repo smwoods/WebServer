@@ -15,6 +15,7 @@ The port number is passed as an argument */
 int connection_handler(int);
 
 int main(int argc, char *argv[]) {
+
     int webcache, multithreading;
     webcache = 0;
     multithreading = 0;
@@ -267,17 +268,12 @@ int html_file(int newsock_fd, char *request) {
 int cgi_script(int newsock_fd, char *request) {
     pid_t pid;
     int status;
-    char *pathname;
-
-    pathname = calloc(255, 1);
-    strcat(pathname, ".");
-    strcat(pathname, request);
 
     if ((pid = fork()) == 0) {
         dup2(newsock_fd, STDOUT_FILENO);
         close(newsock_fd);
-        execl(pathname, (char*) 0);
-        exit(0);
+        execl(request, (char*) 0);
+        exit(-1);
     }
 
     if (pid > 0) {
@@ -290,26 +286,24 @@ int cgi_script(int newsock_fd, char *request) {
             printf("%s\n", "success");
         } 
         else if (WIFEXITED(status) && WEXITSTATUS(status)) {
-          if (WEXITSTATUS(status) == 127) {
-            printf("%s\n", "failure ");
+          if (WEXITSTATUS(status) == -1) {
+            printf("%s\n", "Exec failure");
             /* execl() failed */
           }
           else {
-            /* the program terminated normally, but returned a non-zero status */
-            printf("%s\n", "fuck");
+            printf("%s\n", "Child process returning nonzero");
           }
         } 
         else {
-          /* the program didn't terminate normally */
-            printf("%s\n", "double fuck");
+            printf("%s\n", "Error in child process");
         }
       }
       else {
-        /* waitpid() failed */
+        printf("%s\n", "Waitpid failed");
       }
     }
     else {
-      /* failed to fork() */
+      printf("%s\n", "Fork failed");
     }
 }
 
@@ -361,7 +355,6 @@ int connection_handler(int newsock_fd) {
             return_404(newsock_fd);
             break;
     }
-    
     close(newsock_fd);
     
     return 0;

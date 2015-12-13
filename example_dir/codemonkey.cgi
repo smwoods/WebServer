@@ -1,3 +1,3 @@
 #!/bin/sh
 # test.cgi -- a simple test
-printf "Content-type: text/plain\n\nThis is a test!\n"
+printf "HTTP/1.1 200 OK\nContent-type: text/plain\n\nThis is a test!\n"
