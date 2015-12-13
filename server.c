@@ -18,7 +18,12 @@ The port number is passed as an argument */
 #define IMAGE_JPEG  4
 #define IMAGE_GIF   5
 
-int webcache, multithreading;
+typedef struct cache_entry {
+    int cache_entry;
+    pointer;
+} cache_entry;
+
+int webcache, multithreading, cache_counter;
 char cachesize[10];
 
 //the thread function
