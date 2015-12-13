@@ -26,10 +26,16 @@ int connection_handler(int);
 
 int main(int argc, char *argv[]) {
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
     int webcache, multithreading;
 >>>>>>> 21c1988... merge
+=======
+
+    int webcache, multithreading;
+
+>>>>>>> 3ee3f1d... merge
     webcache = 0;
     multithreading = 0;
 
