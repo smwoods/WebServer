@@ -24,11 +24,9 @@ int webcache, multithreading;
 int connection_handler(int);
 
 int main(int argc, char *argv[]) {
-<<<<<<< HEAD
 
     int webcache, multithreading;
-=======
->>>>>>> f09fd00b23e71d5bb04b782a186c1e92753612a9
+
     webcache = 0;
     multithreading = 0;
 
