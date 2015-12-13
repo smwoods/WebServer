@@ -6,14 +6,14 @@ use CGI;
 my $cgi = CGI->new;
 
 
-if(!defined $ARGV[0]){
-    print "No FilePath Specified!\n";
-}
+# if(!defined $ARGV[0]){
+#     print "No FilePath Specified!\n";
+# }
 
 
-if(!defined $ARGV[1]){
-    print "No FilePath Specified!\n";
-}
+# if(!defined $ARGV[1]){
+#     print "No FilePath Specified!\n";
+# }
 
 # my $num_args = $#ARGV + 1;
 # printf("we have %d arguments\n", $num_args);
@@ -35,11 +35,3 @@ plot "$data" using 1:3:xtic(2) with boxes
 GNU
 
 print GNUPLOT $parameter;
-
-
-# set key left box
-# set samples 50
-# set style data points
-# set terminal gif
-# set output $filename
-# plot [-10:10] sin(x),atan(x),cos(atan(x))
