@@ -18,13 +18,11 @@ The port number is passed as an argument */
 #define IMAGE_JPEG  4
 #define IMAGE_GIF   5
 
-typedef struct cache_entry {
-    int cache_entry;
-    pointer;
-} cache_entry;
+// typedef struct cache_entry {
+//     int cache_entry;
+//     pointer;
+// } cache_entry;
 
-int webcache, multithreading, cache_counter;
-char cachesize[10];
 
 
 <<<<<<< HEAD
@@ -183,17 +181,17 @@ int request_type(char *token) {
 
 }
 
-void return_404(int newsock_fd){
+void return_404(int new_sock){
     char *not_found = "HTTP/1.1 404 Not Found\nContent-type: text/html\n\n \
         <html><head><title>404</title></head><body><h1>404 NOT FOUND</h1></body></html>";
     int n;
-    n = write(newsock_fd, not_found, strlen(not_found));
+    n = write(new_sock, not_found, strlen(not_found));
     if (n < 0) {
         perror("Error writing to client");
     }
 }
 
-int cgi_script(int newsock_fd, char *request) {
+int cgi_script(int new_sock, char *request) {
 
     pid_t pid;
     int status;
@@ -211,6 +209,7 @@ int cgi_script(int newsock_fd, char *request) {
     strcat(data_name, request);
     strcat(data_name, "-data.dat");
 
+<<<<<<< HEAD
     if(webcache == 0){
         if (file_exist(image_name)){
             if(remove(image_name) != 0){
@@ -227,10 +226,27 @@ int cgi_script(int newsock_fd, char *request) {
     }
 =======
 >>>>>>> 21c1988... merge
+=======
+    // if (cache == 0){
+    //     if (file_exist(image_name)){
+    //         if(remove(image_name) != 0){
+    //             printf("Issue removing %s.. will now abort.\n", image_name);
+    //             return -1;
+    //         }
+    //     }
+    //     if (file_exist(data_name)){
+    //         if(remove(data_name) != 0){
+    //             printf("Issue removing %s.. will now abort.\n", data_name);
+    //             return -1;
+    //         }
+    //     }
+    // }
+
+>>>>>>> fb566f8... Fixed error with arg parser
 
     if ((pid = fork()) == 0) {
-        dup2(newsock_fd, STDOUT_FILENO);
-        close(newsock_fd);
+        dup2(new_sock, STDOUT_FILENO);
+        close(new_sock);
 
         if (strstr(request, "my-histogram")) {
             char params[10][70];
@@ -281,7 +297,7 @@ int cgi_script(int newsock_fd, char *request) {
     }
 
     if (pid > 0) {
-      close(newsock_fd);
+      close(new_sock);
       if (waitpid(pid, &status, 0) > 0) {
         if (WIFEXITED(status) && !WEXITSTATUS(status)) {
            return 0;
@@ -309,27 +325,27 @@ int cgi_script(int newsock_fd, char *request) {
     }
     else {
       printf("%s\n", "Fork failed");
-      return -1
+      return -1;
     }
 
     return 0;
 }
 
-int directory_listing(int newsock_fd, char *request) {
+int directory_listing(int new_sock, char *request) {
     pid_t pid;
     int status;
 
     char *const arguments[2] = {"directorylisting.cgi", request};
 
     if ((pid = fork()) == 0) {
-        dup2(newsock_fd, STDOUT_FILENO);
-        close(newsock_fd);
+        dup2(new_sock, STDOUT_FILENO);
+        close(new_sock);
         execv("./example_dir/directorylisting.cgi", arguments);
         exit(-1);
     }
 
     if (pid > 0) {
-      close(newsock_fd);
+      close(new_sock);
 
       if (waitpid(pid, &status, 0) > 0) {
         if (WIFEXITED(status) && !WEXITSTATUS(status)) {
@@ -345,14 +361,14 @@ int directory_listing(int newsock_fd, char *request) {
 
     else {
       printf("%s\n", "Fork failed");
-      return -1
+      return -1;
     }
 
 
     return 0;
 }
 
-int image_file(int newsock_fd, char *file_path, int type){ //REWRITE THIS CODE 
+int image_file(int new_sock, char *file_path, int type){ //REWRITE THIS CODE 
     
     FILE *fp;
     char *buf, header[1024], *file_type;
@@ -362,7 +378,7 @@ int image_file(int newsock_fd, char *file_path, int type){ //REWRITE THIS CODE
 
     fp = fopen(file_path, "r");
     if (!fp) {
-        return_404(newsock_fd);
+        return_404(new_sock);
         return -1;
     }
 
@@ -383,11 +399,11 @@ int image_file(int newsock_fd, char *file_path, int type){ //REWRITE THIS CODE
                             "Content-Length: %d\r\n"
                             "Content-Type: image/%s\r\n\n", fsize, file_type);
 
-    write(newsock_fd, header, hsize);
+    write(new_sock, header, hsize);
 
     buf = (char*) malloc(4096);
     while ((nbytes = fread(buf, sizeof(char), 4096, fp)) > 0){
-        write(newsock_fd, buf, nbytes);
+        write(new_sock, buf, nbytes);
     }
     free(buf);
 
@@ -395,14 +411,14 @@ int image_file(int newsock_fd, char *file_path, int type){ //REWRITE THIS CODE
 }
 
 // STILL NEED TO ADD HEADERS FOR HTML)
-int html_file(int newsock_fd, char *request) {
+int html_file(int new_sock, char *request) {
     char *file_buf;
     FILE *f;
     int n;
 
     f = fopen(request, "r");
     if (!f) {
-        return_404(newsock_fd);
+        return_404(new_sock);
         return -1;
     }
     
@@ -418,12 +434,12 @@ int html_file(int newsock_fd, char *request) {
     fclose(f);
 
     // Write buffer to socket
-    n = write(newsock_fd, file_buf, fsize);
+    n = write(new_sock, file_buf, fsize);
     free(file_buf);
     return 0;
 }
 
-int connection_handler(int newsock_fd) {
+int connection_handler(int new_sock) {
     int n;
     char buf[2048];
     char *token, *pathname;
@@ -432,7 +448,7 @@ int connection_handler(int newsock_fd) {
     memset(buf, 0, 2048);
     
     // Read data from client socket into buffer
-    n = read(newsock_fd, buf, 2048);
+    n = read(new_sock, buf, 2048);
     if (n < 0) {
         perror("Error reading socket, exiting...");
         exit(1);
@@ -450,51 +466,63 @@ int connection_handler(int newsock_fd) {
     switch (file_type = request_type(pathname)) {
         case DIR_LIST:
             printf("%s\n", "Directory listing");
-            directory_listing(newsock_fd, pathname);
+            directory_listing(new_sock, pathname);
             break;
         case HTML_FILE:
             printf("%s\n", "html file");
-            html_file(newsock_fd, pathname);
+            html_file(new_sock, pathname);
             break;
         case IMAGE_GIF:
         case IMAGE_JPEG:
             printf("%s\n", "static image");
-            image_file(newsock_fd, pathname, file_type);
+            image_file(new_sock, pathname, file_type);
             break;
         case CGI_SCRIPT:
             printf("%s\n", "cgi script");
-            cgi_script(newsock_fd, pathname);
+            cgi_script(new_sock, pathname);
             break;
         default:
-            return_404(newsock_fd);
+            return_404(new_sock);
             break;
     }
-    close(newsock_fd);
+    close(new_sock);
     
     return 0;
 }
 
 int main(int argc, char *argv[]) {
 
+    // Parse command line arguments
+
     int c;
-    int cache = -1;
+    int cache = 0;
     int thread = 0;
     int port;
 
-    static int const CACHE_MIN = 4
-    static int const CACHE_MAX = 2000
+    static int const CACHE_MIN = 4;
+    static int const CACHE_MAX = 2000;
+    static int const PORT_MIN = 5000;
+    static int const PORT_MAX = 65536;
 
     while ((c = getopt (argc, argv, "p:c:t")) != -1)
     switch (c){
       case 'p':
-        port = atoi(optarg);;
-        break;
-      case 'c':
-        if (CACHE_MIN <= atoi(optarg) <= CACHE_MAX) {
-            cache = atoi(optarg);
+        if (atoi(optarg) >= PORT_MIN && atoi(optarg) <= PORT_MAX) {
+            port = atoi(optarg);
         }
         else {
-            fprintf(stderr,"Error, cache size invalid.");
+            fprintf(stderr,"Error, invalid port.\n");
+            exit(1);
+        }
+        break;
+      case 'c':
+        printf("%s\n", optarg);
+        if (atoi(optarg) >= CACHE_MIN && atoi(optarg) <= CACHE_MAX) {
+            cache = atoi(optarg);
+            printf("%s\n", "TEST");
+        }
+        else {
+            fprintf(stderr,"Error, cache size invalid.\n");
             exit(1);
         }
         break;
@@ -502,23 +530,27 @@ int main(int argc, char *argv[]) {
         thread = 1;
         break;
       default:
-        fprintf(stderr,"Error, invalid flag.");
+        fprintf(stderr, "Error, invalid flag.");
         exit(1);
     }
 
     if (!port) {
-        fprintf(stderr,"Error, no port provided.");
+        fprintf(stderr, "Error, no port provided.");
         exit(1);
     }
     
-    
-    int sock_fd;
-    int newsock_fd;
-    socklen_t client_len;
+    printf("%d\n", port);
+    printf("%d\n", cache);
+    printf("%d\n", thread);
+
+    // Setup server socket
+
+    int server_sock;
+    int new_sock;
+    socklen_t client_size;
     struct sockaddr_in server_addr;
     struct sockaddr_in client_addr;
-    
-    // Get port argument, convert to integer
+    client_size = sizeof(client_addr);
     
     // Allocate memory for the server socket address structure
     memset((char *) &server_addr, 0, sizeof(server_addr));
@@ -529,34 +561,35 @@ int main(int argc, char *argv[]) {
     server_addr.sin_port = htons(port);
     
     // Try to open an internet socket, save is file descriptor
-    if ((sock_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        perror("Error opening socket, exiting...");
+    if ((server_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        perror("Error opening socket");
         exit(1);
     }
+
     
     // Bind server IP and port to the socket
-    if (bind(sock_fd, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
-        perror("Error binding socket, exiting...");
+    if (bind(server_sock, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
+        perror("Error binding socket");
         exit(1);
     }
     
     // Allow the socket to accept connections
-    listen(sock_fd, 5);
-    
-    puts("Waiting for incoming connections...");
-    client_len = sizeof(client_addr);
+    listen(server_sock, 5);
+        
     
     // Extract the first connection in queue, create a new socket for
     // it with the same type and address as the original, return a new
-    // socket file descriptor in newsock_fd
-    while ((newsock_fd = accept(sock_fd, (struct sockaddr *)&client_addr, (socklen_t*)&client_len))) {
-        puts("Received a request");
-        connection_handler(newsock_fd);
+    // socket file descriptor in new_sock
+    fprintf(stdout, "Socket connection successful, waiting for incoming connections...\n");
+    while ((new_sock = accept(server_sock, (struct sockaddr *)&client_addr, (socklen_t*)&client_size))) {
+        fprintf(stdout, "Incoming request from client, passing to handler.\n");
+        connection_handler(new_sock);
     }
     
-    if (newsock_fd < 0) {
-        perror("Error, connection was not accepted");
-        return -1;
+    if (new_sock < 0) {
+        perror("Error accepting connction to socket");
+        exit(1);
     }
+
     return 0;
 }
