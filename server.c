@@ -155,6 +155,7 @@ int request_type(char *token) {
     if (access(token, F_OK) == -1) {
         return -1;
     } 
+
     // If no dot, assume request is for directory
     if (!dot){
         return DIR_LIST;
@@ -181,14 +182,16 @@ int request_type(char *token) {
 
 }
 
-void return_404(int new_sock){
+int return_404(int new_sock){
     char *not_found = "HTTP/1.1 404 Not Found\nContent-type: text/html\n\n \
         <html><head><title>404</title></head><body><h1>404 NOT FOUND</h1></body></html>";
     int n;
     n = write(new_sock, not_found, strlen(not_found));
     if (n < 0) {
         perror("Error writing to client");
+        return 1;
     }
+    return 0;
 }
 
 int cgi_script(int new_sock, char *request) {
@@ -285,6 +288,7 @@ int cgi_script(int new_sock, char *request) {
         }
         else{
             execl(request, (char*) 0);
+            // This will only be reached if exec fails
             exit(-1);
         }
 <<<<<<< HEAD
@@ -340,32 +344,31 @@ int directory_listing(int new_sock, char *request) {
     if ((pid = fork()) == 0) {
         dup2(new_sock, STDOUT_FILENO);
         close(new_sock);
-        execv("./example_dir/directorylisting.cgi", arguments);
-        exit(-1);
+        execv("cgi_scripts/directorylisting.cgi", arguments);
+        exit(1);
     }
 
     if (pid > 0) {
-      close(new_sock);
 
       if (waitpid(pid, &status, 0) > 0) {
         if (WIFEXITED(status) && !WEXITSTATUS(status)) {
            return 0;
         } 
         else if (WIFEXITED(status) && WEXITSTATUS(status)) {
-          if (WEXITSTATUS(status) == -1) {
-            return -1;
+          if (WEXITSTATUS(status) == 1) {
+            perror("Error starting child process");
+            return 1;
           }
         } 
       }
     }
 
     else {
-      printf("%s\n", "Fork failed");
-      return -1;
+      perror("Error forking child process");
+      return 1;
     }
 
-
-    return 0;
+    return 1;
 }
 
 int image_file(int new_sock, char *file_path, int type){ //REWRITE THIS CODE 
@@ -446,15 +449,17 @@ int connection_handler(int new_sock) {
     
     // Fill buffer with zeros
     memset(buf, 0, 2048);
-    
+    printf("%s\n", "TEST1");
     // Read data from client socket into buffer
     n = read(new_sock, buf, 2048);
     if (n < 0) {
-        perror("Error reading socket, exiting...");
+        perror("Error reading socket");
         exit(1);
     }
+
     
     // Tokenize request packet, get request token, and add a period
+    printf("%s:\n%s\n", "BUF-----------", buf);
     token = strtok(buf, " ");
     token = strtok(NULL, " ");
     pathname = calloc(strlen(token)+1, 1);
@@ -463,31 +468,36 @@ int connection_handler(int new_sock) {
     
     // Ignore request for favicon
     int file_type;
+    int ret = 0;
     switch (file_type = request_type(pathname)) {
         case DIR_LIST:
-            printf("%s\n", "Directory listing");
-            directory_listing(new_sock, pathname);
+            fprintf(stdout, "Directory listing\n");
+            ret = directory_listing(new_sock, pathname);
+            if (ret != 0) {
+
+            }
             break;
         case HTML_FILE:
-            printf("%s\n", "html file");
-            html_file(new_sock, pathname);
+            fprintf(stdout, "HTML file\n");
+            ret = html_file(new_sock, pathname);
             break;
         case IMAGE_GIF:
         case IMAGE_JPEG:
-            printf("%s\n", "static image");
-            image_file(new_sock, pathname, file_type);
+            fprintf(stdout, "Static image\n");
+            ret = image_file(new_sock, pathname, file_type);
             break;
         case CGI_SCRIPT:
-            printf("%s\n", "cgi script");
-            cgi_script(new_sock, pathname);
+            fprintf(stdout, "CGI script\n");
+            ret = cgi_script(new_sock, pathname);
             break;
         default:
-            return_404(new_sock);
+            fprintf(stdout, "File not found\n");
+            ret = return_404(new_sock);
             break;
     }
     close(new_sock);
     
-    return 0;
+    return ret;
 }
 
 int main(int argc, char *argv[]) {
@@ -530,19 +540,15 @@ int main(int argc, char *argv[]) {
         thread = 1;
         break;
       default:
-        fprintf(stderr, "Error, invalid flag.");
+        fprintf(stderr, "Error, invalid flag.\n");
         exit(1);
     }
 
     if (!port) {
-        fprintf(stderr, "Error, no port provided.");
+        fprintf(stderr, "Error, no port provided.\n");
         exit(1);
     }
     
-    printf("%d\n", port);
-    printf("%d\n", cache);
-    printf("%d\n", thread);
-
     // Setup server socket
 
     int server_sock;
@@ -580,10 +586,14 @@ int main(int argc, char *argv[]) {
     // Extract the first connection in queue, create a new socket for
     // it with the same type and address as the original, return a new
     // socket file descriptor in new_sock
+    int ret;
     fprintf(stdout, "Socket connection successful, waiting for incoming connections...\n");
     while ((new_sock = accept(server_sock, (struct sockaddr *)&client_addr, (socklen_t*)&client_size))) {
         fprintf(stdout, "Incoming request from client, passing to handler.\n");
-        connection_handler(new_sock);
+        ret = connection_handler(new_sock);
+        if (ret != 0) {
+            fprintf(stderr, "Server error while handling request.\n");
+        }
     }
     
     if (new_sock < 0) {
