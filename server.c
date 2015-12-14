@@ -11,6 +11,7 @@ The port number is passed as an argument */
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include "uthash.h"
 
 #define DIR_LIST    1
 #define HTML_FILE   2
@@ -18,11 +19,83 @@ The port number is passed as an argument */
 #define IMAGE_JPEG  4
 #define IMAGE_GIF   5
 
-// typedef struct cache_entry {
-//     int cache_entry;
-//     pointer;
-// } cache_entry;
 
+typedef struct Entry {
+    char* command;
+    struct Entry* next;
+    struct Entry* prev;
+    char* response_data;
+    UT_hash_handle hh;
+} Entry;
+
+typedef struct Cache {
+    int current_size;
+    Entry* first;
+    Entry* last;
+} Cache;
+
+Cache my_cache = { .current_size = 0, .first = NULL , .last = NULL };
+Entry* cache_hash = NULL;
+int cache_sz = 100;
+
+
+int insert_cache_entry(Entry* new_entry) {
+
+    if (my_cache.current_size == 0) {
+        my_cache.first = new_entry;
+        my_cache.last = new_entry;
+        my_cache.current_size = strlen(new_entry->response_data);
+    }
+    else {
+        my_cache.first->next = new_entry;
+        new_entry->prev = my_cache.first;
+        my_cache.first = new_entry;
+        my_cache.current_size += strlen(new_entry->response_data);
+    }
+    HASH_ADD_STR(cache_hash, command, new_entry);
+
+    while (my_cache.current_size > cache_sz) {
+        my_cache.current_size -= strlen(my_cache.last->response_data);
+        my_cache.last = my_cache.last->next;
+        my_cache.last->prev = NULL;
+    }
+
+    return 0;
+}
+
+Entry* cache_lookup(char* command) {
+    Entry* entry;
+    HASH_FIND_STR(cache_hash, command, entry);
+    if (entry) {
+        if (entry == my_cache.last) {
+            my_cache.last = my_cache.last->next;
+            my_cache.last->prev = NULL;
+            my_cache.first->next = entry;
+            entry->prev = my_cache.first;
+            my_cache.first = entry;
+        }
+        else if (entry != my_cache.first){
+            entry->prev->next = entry->next;
+            entry->next->prev = entry->prev;
+            my_cache.first->next = entry;
+            entry->prev = my_cache.first;
+            my_cache.first = entry;
+        }
+    }
+    return entry;
+}
+
+void print_cache() {
+    if (my_cache.first) {
+        printf("%s:%s\n", "first", my_cache.first->response_data);
+    }
+    if (my_cache.last) {
+        printf("%s:%s\n", "last", my_cache.last->response_data);
+    }
+    if (my_cache.current_size) {
+        printf("%s:%d\n", "size", my_cache.current_size);
+    }
+}
 
 
 <<<<<<< HEAD
@@ -500,12 +573,46 @@ int connection_handler(int new_sock) {
     return ret;
 }
 
-int main(int argc, char *argv[]) {
+void cache_test() {
+    Entry new_entry1 = {
+        .command = "entry1", 
+        .next = NULL, 
+        .prev = NULL, 
+        .response_data = "11111111111"
+    };
+    Entry new_entry2 = {
+        .command = "entry2", 
+        .next = NULL, 
+        .prev = NULL, 
+        .response_data = "2222222222"
+    };
+    Entry new_entry3 = {
+        .command = "entry3", 
+        .next = NULL, 
+        .prev = NULL, 
+        .response_data = "33333333"
+    };
 
-    // Parse command line arguments
+    Entry* test_ent;
+    insert_cache_entry(&new_entry1);
+    print_cache();
+    insert_cache_entry(&new_entry2);
+    print_cache();
+    insert_cache_entry(&new_entry3);
+    print_cache();
+    cache_lookup("entry2");
+    print_cache();
+}
+
+int main(int argc, char *argv[]) {
+    
+
+    // cache_test();
+
+    Parse command line arguments
+
 
     int c;
-    int cache = 0;
     int thread = 0;
     int port;
 
@@ -514,7 +621,7 @@ int main(int argc, char *argv[]) {
     static int const PORT_MIN = 5000;
     static int const PORT_MAX = 65536;
 
-    while ((c = getopt (argc, argv, "p:c:t")) != -1)
+    while ((c = getopt (argc, argv, "p::c:t")) != -1)
     switch (c){
       case 'p':
         if (atoi(optarg) >= PORT_MIN && atoi(optarg) <= PORT_MAX) {
@@ -528,7 +635,7 @@ int main(int argc, char *argv[]) {
       case 'c':
         printf("%s\n", optarg);
         if (atoi(optarg) >= CACHE_MIN && atoi(optarg) <= CACHE_MAX) {
-            cache = atoi(optarg);
+            cache_sz = atoi(optarg) * 1000;
             printf("%s\n", "TEST");
         }
         else {
