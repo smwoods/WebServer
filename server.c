@@ -18,10 +18,10 @@ The port number is passed as an argument */
 #define IMAGE_JPEG  4
 #define IMAGE_GIF   5
 
-// typedef struct cache_entry {
-//     int cache_entry;
-//     pointer;
-// } cache_entry;
+typedef struct cache_entry {
+    int cache_entry;
+    pointer;
+} cache_entry;
 
 int webcache, multithreading, cache_counter;
 char cachesize[10];
@@ -343,40 +343,42 @@ int connection_handler(int newsock_fd) {
 
 int main(int argc, char *argv[]) {
 
-    if (argc < 2) {
-        fprintf(stderr,"Error, no port provided.");
+    int c;
+    int cache = -1;
+    int thread = 0;
+    int port;
+
+    static int const CACHE_MIN = 4
+    static int const CACHE_MAX = 2000
+
+    while ((c = getopt (argc, argv, "p:c:t")) != -1)
+    switch (c){
+      case 'p':
+        port = atoi(optarg);;
+        break;
+      case 'c':
+        if (CACHE_MIN <= atoi(optarg) <= CACHE_MAX) {
+            cache = atoi(optarg);
+        }
+        else {
+            fprintf(stderr,"Error, cache size invalid.");
+            exit(1);
+        }
+        break;
+      case 't':
+        thread = 1;
+        break;
+      default:
+        fprintf(stderr,"Error, invalid flag.");
         exit(1);
     }
 
-    int webcache, multithreading;
-    webcache = 0;
-    multithreading = 0;
-
-    if (argc > 2){
-        if (strcmp(argv[2], "multi") == 0) {
-            multithreading = 1;
-        } else if(strcmp(argv[2], "cache") == 0){
-            webcache = 1;
-        }
-        if(argc > 3){
-            if(strcmp(argv[3], "cache") == 0){
-                webcache = 1;
-            }
-            else if(strcmp(argv[3], "multi") == 0){
-                multithreading = 1
-            }
-        }
-    }
-    if (webcache == 1) {
-        printf("Web cache initiated!!\n");
-        printf("Enter cache size: ");
-        gets(cachesize);
-    }
-    if (multithreading == 1) {
-        printf("multithreading initiated!\n");
+    if (!port) {
+        fprintf(stderr,"Error, no port provided.");
+        exit(1);
     }
     
-    int port;
+    
     int sock_fd;
     int newsock_fd;
     socklen_t client_len;
@@ -384,7 +386,6 @@ int main(int argc, char *argv[]) {
     struct sockaddr_in client_addr;
     
     // Get port argument, convert to integer
-    port = atoi(argv[1]);
     
     // Allocate memory for the server socket address structure
     memset((char *) &server_addr, 0, sizeof(server_addr));
