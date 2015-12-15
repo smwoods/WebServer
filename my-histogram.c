@@ -11,19 +11,29 @@ typedef struct keyword {
     int occurences;
 } keyword;
 
-int match(const char *string, char *pattern){
-    int status;
-    regex_t    re;
+int match(char *source, char *regexString){
+    regex_t regexCompiled;
+    regmatch_t regmatch_holder;
+    unsigned int m;
+    char * cursor;
 
-    if (regcomp(&re, pattern, REG_EXTENDED|REG_NOSUB) != 0) {
-        return(0);      /* Report error. */
+    if (regcomp(&regexCompiled, regexString, REG_EXTENDED)) {
+        printf("Could not compile regular expression.\n");
+        return 1;
+    };
+
+    m = 0;
+    cursor = source;
+
+    while(!regexec(&regexCompiled, cursor, 1, &regmatch_holder, 0)){
+        unsigned int offset = 0;
+        offset = regmatch_holder.rm_eo;
+        cursor += offset;
+        m++;
     }
-    status = regexec(&re, string, (size_t) 0, NULL, 0);
-    regfree(&re);
-    if (status != 0) {
-        return(0);      /* Report error. */
-    }
-    return(1);
+
+    regfree(&regexCompiled);
+    return m;
 }
 
 char* itoa(int i, char b[]){
@@ -154,7 +164,7 @@ int main(int argc, char *argv[]) {
     while (fgets(line, sizeof(line), subject_file)) {
             for( a = 2; a < argc; a = a + 1 ){
                 if(strcmp(argv[a],"") != 0){
-                    karray[a-2].occurences += num_occurences(line, argv[a]);
+                    karray[a-2].occurences += match(line, argv[a]);
                 }
             }
     }
