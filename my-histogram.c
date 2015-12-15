@@ -125,12 +125,9 @@ int cgi_script(char *path, char *const arguments[]) {
 
 int main(int argc, char *argv[]) {
 
-    int max_padding, webcache, multithreading;
+    int max_padding;
     FILE *subject_file, *dat_file;
     char *gnu_name, *image_name, *data_name;
-
-    webcache = 0;
-    multithreading = 0;
 
     if(argc < 2){
         printf("please include a file paramater.\n");
