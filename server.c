@@ -609,7 +609,7 @@ int main(int argc, char *argv[]) {
 
     // cache_test();
 
-    Parse command line arguments
+    //Parse command line arguments
 
 
     int c;
