@@ -111,6 +111,8 @@ int request_type(char *token) {
 
     if (strstr(token, "my-histogram") != NULL){
         return CGI_SCRIPT;
+    }else if (strstr(token, "keyboard") != NULL){
+        return CGI_SCRIPT;
     }
 
     if (access(token, F_OK) == -1) {
@@ -226,6 +228,17 @@ int cgi_script(int new_sock, char *request) {
             char *const arguments[8] = {params[0], params[1], params[2], params[3], params[4], params[5], params[6], NULL};
 
             execv("./my-histogram", arguments); //params
+            exit(0);
+        }else if (strstr(request, "keyboard")) {
+            char *argvals = strstr(request, "?");
+            printf("ARGVALS: \"%s\"\n", argvals+1);
+            if(strcmp(argvals+1, "") == 0){
+                printf("ERROR: No parameters given to our keyboard!\n");
+                return 1;
+            }
+            char *const arguments[3] = {"keyboard.cgi", argvals+1, NULL};
+
+            execv("./cgi_scripts/keyboard.cgi", arguments); //params
             exit(0);
         }
         else{
