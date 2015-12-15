@@ -395,9 +395,6 @@ int connection_handler(int new_sock) {
         case DIR_LIST:
             fprintf(stdout, "Directory listing\n");
             ret = directory_listing(new_sock, pathname);
-            if (ret != 0) {
-
-            }
             break;
         case HTML_FILE:
             fprintf(stdout, "HTML file\n");
