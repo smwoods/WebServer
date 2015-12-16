@@ -11,7 +11,7 @@ The port number is passed as an argument */
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-#include "uthash.h"
+// #include "uthash.h"
 
 #define DIR_LIST    1
 #define HTML_FILE   2
@@ -20,82 +20,82 @@ The port number is passed as an argument */
 #define IMAGE_GIF   5
 
 
-typedef struct Entry {
-    char* command;
-    struct Entry* next;
-    struct Entry* prev;
-    char* response_data;
-    UT_hash_handle hh;
-} Entry;
+// typedef struct Entry {
+//     char* command;
+//     struct Entry* next;
+//     struct Entry* prev;
+//     char* response_data;
+//     UT_hash_handle hh;
+// } Entry;
 
-typedef struct Cache {
-    int current_size;
-    Entry* first;
-    Entry* last;
-} Cache;
+// typedef struct Cache {
+//     int current_size;
+//     Entry* first;
+//     Entry* last;
+// } Cache;
 
-Cache my_cache = { .current_size = 0, .first = NULL , .last = NULL };
-Entry* cache_hash = NULL;
-int cache_sz = 100;
+// Cache my_cache = { .current_size = 0, .first = NULL , .last = NULL };
+// Entry* cache_hash = NULL;
 
 
-int insert_cache_entry(Entry* new_entry) {
 
-    if (my_cache.current_size == 0) {
-        my_cache.first = new_entry;
-        my_cache.last = new_entry;
-        my_cache.current_size = strlen(new_entry->response_data);
-    }
-    else {
-        my_cache.first->next = new_entry;
-        new_entry->prev = my_cache.first;
-        my_cache.first = new_entry;
-        my_cache.current_size += strlen(new_entry->response_data);
-    }
-    HASH_ADD_STR(cache_hash, command, new_entry);
+// int insert_cache_entry(Entry* new_entry) {
 
-    while (my_cache.current_size > cache_sz) {
-        my_cache.current_size -= strlen(my_cache.last->response_data);
-        my_cache.last = my_cache.last->next;
-        my_cache.last->prev = NULL;
-    }
+//     if (my_cache.current_size == 0) {
+//         my_cache.first = new_entry;
+//         my_cache.last = new_entry;
+//         my_cache.current_size = strlen(new_entry->response_data);
+//     }
+//     else {
+//         my_cache.first->next = new_entry;
+//         new_entry->prev = my_cache.first;
+//         my_cache.first = new_entry;
+//         my_cache.current_size += strlen(new_entry->response_data);
+//     }
+//     HASH_ADD_STR(cache_hash, command, new_entry);
 
-    return 0;
-}
+//     while (my_cache.current_size > cache_sz) {
+//         my_cache.current_size -= strlen(my_cache.last->response_data);
+//         my_cache.last = my_cache.last->next;
+//         my_cache.last->prev = NULL;
+//     }
 
-Entry* cache_lookup(char* command) {
-    Entry* entry;
-    HASH_FIND_STR(cache_hash, command, entry);
-    if (entry) {
-        if (entry == my_cache.last) {
-            my_cache.last = my_cache.last->next;
-            my_cache.last->prev = NULL;
-            my_cache.first->next = entry;
-            entry->prev = my_cache.first;
-            my_cache.first = entry;
-        }
-        else if (entry != my_cache.first){
-            entry->prev->next = entry->next;
-            entry->next->prev = entry->prev;
-            my_cache.first->next = entry;
-            entry->prev = my_cache.first;
-            my_cache.first = entry;
-        }
-    }
-    return entry;
-}
+//     return 0;
+// }
 
-void print_cache() {
-    if (my_cache.first) {
-        printf("%s:%s\n", "first", my_cache.first->response_data);
-    }
-    if (my_cache.last) {
-        printf("%s:%s\n", "last", my_cache.last->response_data);
-    }
-    if (my_cache.current_size) {
-        printf("%s:%d\n", "size", my_cache.current_size);
-    }
-}
+// Entry* cache_lookup(char* command) {
+//     Entry* entry;
+//     HASH_FIND_STR(cache_hash, command, entry);
+//     if (entry) {
+//         if (entry == my_cache.last) {
+//             my_cache.last = my_cache.last->next;
+//             my_cache.last->prev = NULL;
+//             my_cache.first->next = entry;
+//             entry->prev = my_cache.first;
+//             my_cache.first = entry;
+//         }
+//         else if (entry != my_cache.first){
+//             entry->prev->next = entry->next;
+//             entry->next->prev = entry->prev;
+//             my_cache.first->next = entry;
+//             entry->prev = my_cache.first;
+//             my_cache.first = entry;
+//         }
+//     }
+//     return entry;
+// }
+
+// void print_cache() {
+//     if (my_cache.first) {
+//         printf("%s:%s\n", "first", my_cache.first->response_data);
+//     }
+//     if (my_cache.last) {
+//         printf("%s:%s\n", "last", my_cache.last->response_data);
+//     }
+//     if (my_cache.current_size) {
+//         printf("%s:%d\n", "size", my_cache.current_size);
+//     }
+// }
 
 
 <<<<<<< HEAD
@@ -223,12 +223,13 @@ int request_type(char *token) {
 
     if (strstr(token, "my-histogram") != NULL){
         return CGI_SCRIPT;
-    }else if (strstr(token, "keyboard") != NULL){
+    }
+    else if (strstr(token, "keyboard") != NULL){
         return CGI_SCRIPT;
     }
 
     if (access(token, F_OK) == -1) {
-        return -1;
+        return 1;
     } 
 
     // If no dot, assume request is for directory
@@ -457,7 +458,7 @@ int directory_listing(int new_sock, char *request) {
     return 1;
 }
 
-int image_file(int new_sock, char *file_path, int type){ //REWRITE THIS CODE 
+int image_file(int new_sock, char *file_path, int type){
     
     FILE *fp;
     char *buf, header[1024], *file_type;
@@ -535,7 +536,6 @@ int connection_handler(int new_sock) {
     
     // Fill buffer with zeros
     memset(buf, 0, 2048);
-    printf("%s\n", "TEST1");
     // Read data from client socket into buffer
     n = read(new_sock, buf, 2048);
     if (n < 0) {
@@ -545,7 +545,6 @@ int connection_handler(int new_sock) {
 
     
     // Tokenize request packet, get request token, and add a period
-    printf("%s:\n%s\n", "BUF-----------", buf);
     token = strtok(buf, " ");
     token = strtok(NULL, " ");
     pathname = calloc(strlen(token)+1, 1);
@@ -583,36 +582,36 @@ int connection_handler(int new_sock) {
     return ret;
 }
 
-void cache_test() {
-    Entry new_entry1 = {
-        .command = "entry1", 
-        .next = NULL, 
-        .prev = NULL, 
-        .response_data = "11111111111"
-    };
-    Entry new_entry2 = {
-        .command = "entry2", 
-        .next = NULL, 
-        .prev = NULL, 
-        .response_data = "2222222222"
-    };
-    Entry new_entry3 = {
-        .command = "entry3", 
-        .next = NULL, 
-        .prev = NULL, 
-        .response_data = "33333333"
-    };
+// void cache_test() {
+//     Entry new_entry1 = {
+//         .command = "entry1", 
+//         .next = NULL, 
+//         .prev = NULL, 
+//         .response_data = "11111111111"
+//     };
+//     Entry new_entry2 = {
+//         .command = "entry2", 
+//         .next = NULL, 
+//         .prev = NULL, 
+//         .response_data = "2222222222"
+//     };
+//     Entry new_entry3 = {
+//         .command = "entry3", 
+//         .next = NULL, 
+//         .prev = NULL, 
+//         .response_data = "33333333"
+//     };
 
-    Entry* test_ent;
-    insert_cache_entry(&new_entry1);
-    print_cache();
-    insert_cache_entry(&new_entry2);
-    print_cache();
-    insert_cache_entry(&new_entry3);
-    print_cache();
-    cache_lookup("entry2");
-    print_cache();
-}
+//     Entry* test_ent;
+//     insert_cache_entry(&new_entry1);
+//     print_cache();
+//     insert_cache_entry(&new_entry2);
+//     print_cache();
+//     insert_cache_entry(&new_entry3);
+//     print_cache();
+//     cache_lookup("entry2");
+//     print_cache();
+// }
 
 int main(int argc, char *argv[]) {
     
@@ -623,11 +622,11 @@ int main(int argc, char *argv[]) {
 
 
     int c;
-    int thread = 0;
+    // int thread = 0;
     int port;
 
-    static int const CACHE_MIN = 4;
-    static int const CACHE_MAX = 2000;
+    // static int const CACHE_MIN = 4;
+    // static int const CACHE_MAX = 2000;
     static int const PORT_MIN = 5000;
     static int const PORT_MAX = 65536;
 
@@ -642,20 +641,20 @@ int main(int argc, char *argv[]) {
             exit(1);
         }
         break;
-      case 'c':
-        printf("%s\n", optarg);
-        if (atoi(optarg) >= CACHE_MIN && atoi(optarg) <= CACHE_MAX) {
-            cache_sz = atoi(optarg) * 1000;
-            printf("%s\n", "TEST");
-        }
-        else {
-            fprintf(stderr,"Error, cache size invalid.\n");
-            exit(1);
-        }
-        break;
-      case 't':
-        thread = 1;
-        break;
+      // case 'c':
+      //   printf("%s\n", optarg);
+      //   if (atoi(optarg) >= CACHE_MIN && atoi(optarg) <= CACHE_MAX) {
+      //       cache_sz = atoi(optarg) * 1000;
+      //       printf("%s\n", "TEST");
+      //   }
+      //   else {
+      //       fprintf(stderr,"Error, cache size invalid.\n");
+      //       exit(1);
+      //   }
+      //   break;
+      // case 't':
+      //   thread = 1;
+      //   break;
       default:
         fprintf(stderr, "Error, invalid flag.\n");
         exit(1);
