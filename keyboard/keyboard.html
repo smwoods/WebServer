@@ -1,72 +1,757 @@
 <head>
-<link rel="stylesheet" type="text/css" href="keyboard.css">
+    <style type="text/css">
+                /**
+         * Pure CSS3 Piano by Taufik Nurrohman
+         * On: 1 December 2011
+         * URL: http://hompimpaalaihumgambreng.blogspot.com/
+         * Note: This experiment is under the God Almighty License.
+         * Please do not replace or remove the attribution above if you want to save/modify this project legally.
+         * Good luck!
+         */
+
+        * {
+          margin:0px;
+          padding:0px;
+          list-style:none;
+        }
+
+        :focus {
+          outline:none !important;
+        }
+
+        body {
+          background:#666;
+          background:-webkit-radial-gradient(bottom left,cover,#999,#666);
+          background:-moz-radial-gradient(bottom left,cover,#999,#666);
+          background:-ms-radial-gradient(bottom left,cover,#999,#666);
+          background:-o-radial-gradient(bottom left,cover,#999,#666);
+          background:radial-gradient(bottom left,cover,#999,#666);
+          height:500px;
+        }
+
+        a {
+          color:indigo;
+          text-decoration:none;
+        }
+
+        a:hover {
+          text-decoration:underline;
+        }
+
+        /* Piano Wrapper */
+        #p-wrapper {
+          background:#000;
+          background:-webkit-linear-gradient(-60deg,#000,#333,#000,#666,#333 70%);
+          background:-moz-linear-gradient(-60deg,#000,#333,#000,#666,#333 70%);
+          background:-ms-linear-gradient(-60deg,#000,#333,#000,#666,#333 70%);
+          background:-o-linear-gradient(-60deg,#000,#333,#000,#666,#333 70%);
+          background:linear-gradient(-60deg,#000,#333,#000,#666,#333 70%);
+          width:1300px;
+        /*  position:relative; */
+          margin-left: auto;
+          margin-right: auto;
+          left:-20px;
+          -webkit-box-shadow:0 2px 0px #666,0 3px 0px #555,0 4px 0px #444,0 6px 6px #000,inset 0 -1px 1px rgba(255,255,255,0.5),inset 0 -4px 5px #000;
+          -moz-box-shadow:0 2px 0px #666,0 3px 0px #555,0 4px 0px #444,0 6px 6px #000,inset 0 -1px 1px rgba(255,255,255,0.5),inset 0 -4px 5px #000;
+          box-shadow:0 2px 0px #666,0 3px 0px #555,0 4px 0px #444,0 6px 6px #000,inset 0 -1px 1px rgba(255,255,255,0.5),inset 0 -4px 5px #000;
+          border:2px solid #333;
+          -webkit-border-radius:0 0 5px 5px;
+          -moz-border-radius:0 0 5px 5px;
+          border-radius:0 0 5px 5px;
+          -webkit-animation:taufik 2s;
+          -moz-animation:taufik 2s;
+          animation:taufik 2s;
+        }
+
+        /* Tuts */
+        ul#piano {
+          display:block;
+          width:100%;
+          height:240px;
+          border-top:2px solid #222;
+        }
+
+        ul#piano li {
+          list-style:none;
+          float:left;
+          display:inline;
+          background:#aaa;
+          width:40px;
+          position:relative;
+        }
+
+        ul#piano li a,ul#piano li div.anchor {
+          display:block;
+          height:220px;
+          background:#fff;
+          background:-webkit-linear-gradient(-30deg,#f5f5f5,#fff);
+          background:-moz-linear-gradient(-30deg,#f5f5f5,#fff);
+          background:-ms-linear-gradient(-30deg,#f5f5f5,#fff);
+          background:-o-linear-gradient(-30deg,#f5f5f5,#fff);
+          background:linear-gradient(-30deg,#f5f5f5,#fff);
+          border:1px solid #ccc;
+          -webkit-box-shadow:inset 0 1px 0px #fff,inset 0 -1px 0px #fff,inset 1px 0px 0px #fff,inset -1px 0px 0px #fff,0 4px 3px rgba(0,0,0,0.7);
+          -moz-box-shadow:inset 0 1px 0px #fff,inset 0 -1px 0px #fff,inset 1px 0px 0px #fff,inset -1px 0px 0px #fff,0 4px 3px rgba(0,0,0,0.7);
+          box-shadow:inset 0 1px 0px #fff,inset 0 -1px 0px #fff,inset 1px 0px 0px #fff,inset -1px 0px 0px #fff,0 4px 3px rgba(0,0,0,0.7);
+          -webkit-border-radius:0 0 3px 3px;
+          -moz-border-radius:0 0 3px 3px;
+          border-radius:0 0 3px 3px;
+        }
+
+        ul#piano li a:active,ul#piano li div.anchor:active {
+          -webkit-box-shadow:0 2px 2px rgba(0,0,0,0.4);
+          -moz-box-shadow:0 2px 2px rgba(0,0,0,0.4);
+          box-shadow:0 2px 2px rgba(0,0,0,0.4);
+          position:relative;
+          top:2px;
+          height:216px;
+        }
+
+        ul#piano li a:active:before,ul#piano li div.anchor:active:before {
+          content:"";
+          width:0px;
+          height:0px;
+          border-width:216px 5px 0px;
+          border-style:solid;
+          border-color:transparent transparent transparent rgba(0,0,0,0.1);
+          position:absolute;
+          left:0px;
+          top:0px;
+        }
+
+        ul#piano li a:active:after,ul#piano li div.anchor:active:after {
+          content:"";
+          width:0px;
+          height:0px;
+          border-width:216px 5px 0px;
+          border-style:solid;
+          border-color:transparent rgba(0,0,0,0.1) transparent transparent;
+          position:absolute;
+          right:0px;
+          top:0px;
+        }
+
+        /* Black Tuts */
+        ul#piano li span {
+          position:absolute;
+          top:0px;
+          /*left:-12px;*/
+          width:20px;
+          height:120px;
+          background:#333;
+          background:-webkit-linear-gradient(-20deg,#333,#000,#333);
+          background:-moz-linear-gradient(-20deg,#333,#000,#333);
+          background:-ms-linear-gradient(-20deg,#333,#000,#333);
+          background:-o-linear-gradient(-20deg,#333,#000,#333);
+          background:linear-gradient(-20deg,#333,#000,#333);
+          z-index:10;
+          border-width:1px 2px 7px;
+          border-style:solid;
+          border-color:#666 #222 #111 #555;
+          -webkit-box-shadow:inset 0px -1px 2px rgba(255,255,255,0.4),0 2px 3px rgba(0,0,0,0.4);
+          -moz-box-shadow:inset 0px -1px 2px rgba(255,255,255,0.4),0 2px 3px rgba(0,0,0,0.4);
+          box-shadow:inset 0px -1px 2px rgba(255,255,255,0.4),0 2px 3px rgba(0,0,0,0.4);
+          -webkit-border-radius:0 0 2px 2px;
+          -moz-border-radius:0 0 2px 2px;
+          border-radius:0 0 2px 2px;
+        }
+
+        ul#piano li span:active {
+          border-bottom-width:2px;
+          height:123px;
+          -webkit-box-shadow:inset 0px -1px 1px rgba(255,255,255,0.4),0 1px 0px rgba(0,0,0,0.8),0 2px 2px rgba(0,0,0,0.4),0 -1px 0px #000;
+          -moz-box-shadow:inset 0px -1px 1px rgba(255,255,255,0.4),0 1px 0px rgba(0,0,0,0.8),0 2px 2px rgba(0,0,0,0.4),0 -1px 0px #000;
+          box-shadow:inset 0px -1px 1px rgba(255,255,255,0.4),0 1px 0px rgba(0,0,0,0.8),0 2px 2px rgba(0,0,0,0.4),0 -1px 0px #000;
+        }
+
+        /* Tooltips */
+        ul#piano li b {
+          position:absolute;
+          top:0px;
+          margin-top:-10px;
+          background:#111;
+          color:#fff;
+          font:bold 14px 'Trebuchet MS',Arial,Sans-Serif;
+          border:2px solid #e6e6e6;
+          -webkit-border-radius:7px;
+          -moz-border-radius:7px;
+          border-radius:7px;
+          width:100px;
+          height:30px;
+          padding:10px;
+          left:-40px;
+          z-index:100;
+          visibility:hidden;
+          opacity:0;
+          -webkit-box-shadow:0 2px 10px rgba(0,0,0,0.5);
+          -moz-box-shadow:0 2px 10px rgba(0,0,0,0.5);
+          box-shadow:0 2px 10px rgba(0,0,0,0.5);
+          -webkit-transition:all 0.2s ease-out;
+          -moz-transition:all 0.2s ease-out;
+          -ms-transition:all 0.2s ease-out;
+          -o-transition:all 0.2s ease-out;
+          -transition:all 0.2s ease-out;
+        }
+
+        /* Tooltip Arrow */
+        ul#piano li b:before {
+          content:"";
+          display:block;
+          position:absolute;
+          top:100%;
+          left:50px;
+          border-width:8px;
+          border-style:solid;
+          border-color:#e6e6e6 transparent transparent transparent;
+        }
+
+        ul#piano li b:after {
+          content:"";
+          display:block;
+          position:absolute;
+          top:100%;
+          left:53px;
+          border-width:5px;
+          border-style:solid;
+          border-color:#111 transparent transparent transparent;
+        }
+
+        ul#piano li:hover b {
+          visibility:visible;
+          opacity:1;
+          margin-top:10px;
+        }
+
+        /* Drop Down Menus */
+        ul#piano li ul,#search,#contact {
+          position:absolute;
+          border:2px solid #e6e6e6;
+          margin-top:-100px;
+          top:100%;
+          left:0px;
+          z-index:1000;
+          visibility:hidden;
+          opacity:0;
+          -webkit-box-shadow:0 2px 7px #000;
+          -moz-box-shadow:0 2px 7px #000;
+          box-shadow:0 2px 7px #000;
+          -webkit-transition:all 0.2s ease-out 0.2s;
+          -moz-transition:all 0.2s ease-out 0.2s;
+          -ms-transition:all 0.2s ease-out 0.2s;
+          -o-transition:all 0.2s ease-out 0.2s;
+          transition:all 0.2s ease-out 0.2s;
+        }
+
+        #search,#contact {
+          background:#333;
+          padding:40px 10px 8px;
+          -webkit-border-radius:0 0 18px 0;
+          -moz-border-radius:0 0 18px 0;
+          border-radius:0 0 18px 0;
+        }
+
+        #search input[type="text"],#contact input[type="text"] {
+          border:1px solid #aaa;
+          font:normal 12px Cambria,Georgia,Serif;
+          padding:2px 5px 2px;
+          width:120px;
+          margin-bottom:2px;
+          margin-right:2px;
+          position:relative;
+          color:#aaa;
+          -webkit-box-shadow:inset 0 0 5px #ccc;
+          -moz-box-shadow:inset 0 0 5px #ccc;
+          box-shadow:inset 0 0 5px #ccc;
+          -webkit-border-radius:0 0 10px 0;
+          -moz-border-radius:0 0 10px 0;
+          border-radius:0 0 10px 0;
+        }
+
+        #contact textarea {
+          border:1px solid #aaa;
+          font:normal 12px Cambria,Georgia,Serif;
+          padding:2px 5px;
+          width:270px;
+          height:100px;
+          margin-top:4px;
+          position:relative;
+          color:#aaa;
+          -webkit-box-shadow:inset 0 0 5px #ccc;
+          -moz-box-shadow:inset 0 0 5px #ccc;
+          box-shadow:inset 0 0 5px #ccc;
+          -webkit-border-radius:0 0 10px 0;
+          -moz-border-radius:0 0 10px 0;
+          border-radius:0 0 10px 0;
+        }
+
+        #contact input[type="submit"] {
+          background:-webkit-linear-gradient(top,#666,#000,#333);
+          background:-moz-linear-gradient(top,#666,#000,#333);
+          background:-ms-linear-gradient(top,#666,#000,#333);
+          background:-o-linear-gradient(top,#666,#000,#333);
+          background:linear-gradient(top,#666,#000,#333);
+          border:none;
+          -webkit-border-radius:3px;
+          -moz-border-radius:3px;
+          border-radius:3px;
+          -webkit-box-shadow:0 1px 1px #000;
+          -moz-box-shadow:0 1px 1px #000;
+          box-shadow:0 1px 1px #000;
+          padding:3px 10px 4px;
+          margin:4px 2px;
+          font:normal 10px Verdana,Arial,Sans-Serif;
+          color:#ccc;
+          float:right;
+        }
+
+        #search input:focus,#contct input:focus,#contact textarea:focus {
+          color:#000;
+        }
+
+        /* Loupe */
+        #search:after {
+          content:"";
+          width:5px;
+          height:5px;
+          border:1px solid #666;
+          -webkit-border-radius:10px;
+          -moz-border-radius:10px;
+          border-radius:10px;
+          position:absolute;
+          left:100%;
+          margin-left:-25px;
+          top:46px;
+          z-index:100;
+        }
+
+        #search:before {
+          content:"";
+          width:2px;
+          height:0px;
+          border:1px solid #666;
+          position:absolute;
+          z-index:3;
+          left:100%;
+          margin-left:-28px;
+          top:53px;
+          -webkit-transform:rotate(-42deg);
+          -moz-transform:rotate(-42deg);
+          -ms-transform:rotate(-42deg);
+          -o-transform:rotate(-42deg);
+          transform:rotate(-42deg);
+        }
+
+        ul#piano li li {
+          width:150px;
+          height:auto;
+          display:block;
+          float:none;
+          background:transparent;
+        }
+
+        ul#piano li li a,ul#piano li li a:active {
+          height:auto;
+          display:block;
+          padding:10px 15px;
+          background:#333;
+          font:normal 12px Arial,Sans-Serif;
+          color:#fff;
+          text-decoration:none;
+          -webkit-box-shadow:none;
+          -moz-box-shadow:none;
+          box-shadow:none;
+          border-radius:0px;
+          -webkit-border-radius:0px;
+          -moz-border-radius:0px;
+          border-width:1px 0;
+          border-style:solid;
+          border-color:#444 transparent #222 transparent;
+          top:0px;
+          margin-top:0px;
+        }
+
+        ul#piano li li a:active:before,ul#piano li li a:active:after {
+          border:none !important;
+        }
+
+        ul#piano li:hover ul,ul#piano li:hover #search,ul#piano li:hover #contact {
+          visibility:visible;
+          opacity:1;
+          margin-top:15px;
+        }
+
+        ul#piano li li a:hover {
+          background:#111;
+          border-top-color:#222;
+          border-bottom-color:#000;
+        }
+
+        /* Paper */
+        .credit {
+          margin:50px;
+          width:390px;
+          height:50px;
+          padding:30px;
+          text-align: center;
+          position:relative;
+          margin-left: auto;
+          margin-right: auto;
+          background:#fff;
+          font:italic 1em Cambria,Georgia,Serif;
+          font-size: 20px;
+          color:#666;
+          background:-webkit-gradient(linear,0% 20%,0% 92%,from(#fff),to(#f9f9f9),color-stop(.1,#fff));
+          background:-moz-linear-gradient(0 0 270deg,#fff,#fff 10%,#f9f9f9);
+          background:-ms-linear-gradient(0 0 270deg,#fff,#fff 10%,#f9f9f9);
+          background:-o-linear-gradient(0 0 270deg,#fff,#fff 10%,#f9f9f9);
+          background:linear-gradient(0 0 270deg,#fff,#fff 10%,#f9f9f9);
+          border:1px solid #ccc;
+          -webkit-box-shadow:1px 1px 4px rgba(0,0,0,0.1);
+          -moz-box-shadow:1px 1px 4px rgba(0,0,0,0.1);
+          box-shadow:1px 1px 4px rgba(0,0,0,0.1);
+          -webkit-border-bottom-right-radius:60px 5px;
+          -moz-border-radius-bottomright:60px 5px;
+          
+        border-bottom-right-radius:60px 5px;
+          -webkit-animation:taufik 1s;
+          -moz-animation:taufik 1s;
+          animation:taufik 1s;
+        }
+
+        .credit:before {
+          content:"";
+          width:98%;
+          z-index:-1;
+          height:100%;
+          padding:0 0 1px 0;
+          position:absolute;
+          bottom:0;
+          right:0;
+          background:#fff;
+          background:-webkit-gradient(linear,0% 20%,0% 92%,from(#fff),to(#f9f9f9),color-stop(.1,#fff));
+          background:-moz-linear-gradient(0 0 270deg,#fff,#fff 10%,#f9f9f9);
+          background:-ms-linear-gradient(0 0 270deg,#fff,#fff 10%,#f9f9f9);
+          background:-o-linear-gradient(0 0 270deg,#fff,#fff 10%,#f9f9f9);
+          background:linear-gradient(0 0 270deg,#fff,#fff 10%,#f9f9f9);
+          border:1px solid #ccc;
+          -webkit-box-shadow:1px 1px 8px rgba(0,0,0,0.1);
+          -moz-box-shadow:1px 1px 8px rgba(0,0,0,0.1);
+          box-shadow:1px 1px 8px rgba(0,0,0,0.1);
+          -webkit-border-bottom-right-radius:60px 5px;
+          -moz-border-radius-bottomright:60px 5px;
+          
+        border-bottom-right-radius:60px 5px;
+          -webkit-transform:skew(2deg,2deg) translate(-4px,8px);
+          -moz-transform:skew(2deg,2deg) translate(-4px,8px);
+          -ms-transform:skew(2deg,2deg) translate(-4px,8px);
+          -o-transform:skew(2deg,2deg) translate(-4px,8px);
+          transform:skew(2deg,2deg) translate(-4px,8px);
+        }
+
+        .credit:after {
+          content:"";
+          width:98%;
+          z-index:-1;
+          height:98%;
+          padding:0 0 1px 0;
+          position:absolute;
+          bottom:0;
+          right:0;
+          background:#f3f3f3;
+          background:-webkit-gradient(linear,0% 20%,0% 92%,from(#fff),to(#f9f9f9),color-stop(.1,#fff));
+          background:-moz-linear-gradient(0 0 270deg,#fff,#fff 10%,#f9f9f9);
+          background:-ms-linear-gradient(0 0 270deg,#fff,#fff 10%,#f9f9f9);
+          background:-o-linear-gradient(0 0 270deg,#fff,#fff 10%,#f9f9f9);
+          background:linear-gradient(0 0 270deg,#fff,#fff 10%,#f9f9f9);
+          border:1px solid #ccc;
+          -webkit-box-shadow:0px 0px 8px rgba(0,0,0,0.1);
+          -moz-box-shadow:0px 0px 8px rgba(0,0,0,0.1);
+          box-shadow:0px 0px 8px rgba(0,0,0,0.1);
+          -webkit-transform:rotate(-4deg) translate(-14px,-2px);
+          -moz-transform:rotate(-4deg) translate(-14px,-2px);
+          -ms-transform:rotate(-4deg) translate(-14px,-2px);
+          -o-transform:rotate(-4deg) translate(-14px,-2px);
+          transform:rotate(-4deg) translate(-14px,-2px);
+        }
+
+        .credit_ribbon {
+          position:absolute;
+          top:0;
+          left:0;
+          width:115px;
+          height:35px;
+          background:rgba(0,0,0,0.1);
+          background:-webkit-gradient(linear,555% 20%,0% 92%,from(rgba(0,0,0,0.1)),to(rgba(0,0,0,0.0)),color-stop(.1,rgba(0,0,0,0.2)));
+          background:-moz-linear-gradient(555% 0 180deg,rgba(0,0,0,0.1),rgba(0,0,0,0.2) 10%,rgba(0,0,0,0.0));
+          background:-ms-linear-gradient(555% 0 180deg,rgba(0,0,0,0.1),rgba(0,0,0,0.2) 10%,rgba(0,0,0,0.0));
+          background:-o-linear-gradient(555% 0 180deg,rgba(0,0,0,0.1),rgba(0,0,0,0.2) 10%,rgba(0,0,0,0.0));
+          background:linear-gradient(555% 0 180deg,rgba(0,0,0,0.1),rgba(0,0,0,0.2) 10%,rgba(0,0,0,0.0));
+          border-left:1px dashed rgba(0,0,0,0.1);
+          border-right:1px dashed rgba(0,0,0,0.1);
+          -webkit-box-shadow:0px 1px 7px rgba(0,0,0,0.2);
+          -moz-box-shadow:0px 1px 7px rgba(0,0,0,0.2);
+          box-shadow:0px 1px 7px rgba(0,0,0,0.2);
+          -webkit-transform:rotate(-30deg) skew(0,0) translate(-30px,-20px);
+          -moz-transform:rotate(-30deg) skew(0,0) translate(-30px,-20px);
+          -o-transform:rotate(-30deg) skew(0,0) translate(-30px,-20px);
+          transform:rotate(-30deg) skew(0,0) translate(-30px,-20px);
+        }
+
+        .clear {
+          clear:both;
+        }
+
+
+        /* Animation */
+        @-webkit-keyframes taufik {
+          from {opacity:0;}
+          to {opacity:1;}
+        }
+        @-moz-keyframes taufik {
+          from {opacity:0;}
+          to {opacity:1;}
+        }
+        @keyframes taufik {
+          from {opacity:0;}
+          to {opacity:1;}
+        }
+
+    </style>
 </head>
 
 
 <div class="credit">
-    <strong>Musicboard Piano</strong>
-    <!-- <div class="credit_ribbon"></div> -->
+    <strong>CS410 Keyboard</strong>
 </div>
 
 <div id="p-wrapper">
     <ul id="piano">
-        <li><div class="anchor"></div><span></span></li>
-        <li><div class="anchor"></div><span></span></li>
-        <li><div class="anchor"></div><span></span></li>
-        <li><div class="anchor"></div></li>
-        <li><div class="anchor"></div><span></span></li>
-        <li><div class="anchor"></div><span></span></li>
-        <li><div class="anchor"></div></li>
-        <li><a href="#"></a><span></span><b>Home</b></li>
-        <li><a href="#"></a><span></span><b>About</b></li>
-        <li><a href="#"></a><span></span><b>Archives</b>
-            <ul>
-                <li><a href="#">2007</a></li>
-                <li><a href="#">2006</a></li>
-                <li><a href="#">2005</a></li>
-                <li><a href="#">2004</a></li>
-            </ul>
-        </li>
-        
-        <li><a href="#"></a><b>Search</b>
-            <div id="search">
-                <form>
-                    <input type="text" placeholder="Search..." />
-                </form>
-            </div>
-        </li>
-        
-        <li><a href="#"></a><span></span><b>Contact Me</b>
-            <div id="contact">
-                <form>
-                    <input type="text" class="required" placeholder="Name" />
-                    <input type="text" class="required" placeholder="Email" />
-                    <textarea class="required" placeholder="Your messages..."></textarea>
-                    <input type="submit" value="Send" />
-                    <div class="clear"></div>
-                </form>
-            </div>
-        </li>
-    
-        <li><div class="anchor"></div><span></span></li>
-        <li><div class="anchor"></div></li>
-        <li><div class="anchor"></div><span></span></li>
-        <li><div class="anchor"></div><span></span></li>
-        <li><div class="anchor"></div><span></span></li>
-        <li><div class="anchor"></div></li>
-        <li><div class="anchor"></div><span></span></li>
-        <li><div class="anchor"></div><span></span></li>
-        <li><div class="anchor"></div></li>
-        <li><div class="anchor"></div><span></span></li>
-        <li><div class="anchor"></div><span></span></li>
-        <li><div class="anchor"></div><span></span></li>
-        <li><div class="anchor"></div></li>
-        <li><div class="anchor"></div><span></span></li>
-        <li><div class="anchor"></div><span></span></li>
-        <li><div class="anchor"></div></li>
-        <li><div class="anchor"></div><span></span></li>
-        <li><div class="anchor"></div><span></span></li>
-        <li><div class="anchor"></div><span></span></li>
-        <li><div class="anchor"></div></li>
+        <li><div id="G1" class="anchor"></div><span></span></li>
+        <li><div id="A1" class="anchor"></div><span></span></li>
+        <li><div id="B1" class="anchor"></div><span></span></li>
+        <li><div id="C1" class="anchor"></div></li>
+        <li><div id="D1" class="anchor"></div><span></span></li>
+        <li><div id="E1" class="anchor"></div><span></span></li>
+        <li><div id="F1" class="anchor"></div></li>
+        <li><div id="G2" class="anchor"></div><span></span></li>
+        <li><div id="A2" class="anchor"></div><span></span></li>
+        <li><div id="B2" class="anchor"></div><span></span></li>
+        <li><div id="C2" class="anchor"></div></li>
+        <li><div id="D2" class="anchor"></div><span></span></li>
+        <li><div id="E2" class="anchor"></div><span></span></li>
+        <li><div id="F2" class="anchor"></div></li>
+        <li><div id="G3" class="anchor"></div><span></span></li>
+        <li><div id="A3" class="anchor"></div><span></span></li>
+        <li><div id="B3" class="anchor"></div><span></span></li>
+        <li><div id="C3" class="anchor"></div></li>
+        <li><div id="D3" class="anchor"></div><span></span></li>
+        <li><div id="E3" class="anchor"></div><span></span></li>
+        <li><div id="F3" class="anchor"></div></li>
+        <li><div id="G4" class="anchor"></div><span></span></li>
+        <li><div id="A4" class="anchor"></div><span></span></li>
+        <li><div id="B4" class="anchor"></div><span></span></li>
+        <li><div id="C4" class="anchor"></div></li>
+        <li><div id="D4" class="anchor"></div><span></span></li>
+        <li><div id="E4" class="anchor"></div><span></span></li>
+        <li><div id="F4" class="anchor"></div></li>
     </ul>
+    <script>
+        var G1 = document.getElementById("G1");
+        G1.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?G1.mp3", "true");
+            xhr.send()
+        },false);
+
+        var A1 = document.getElementById("A1");
+        A1.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?A1.mp3", "true");
+            xhr.send()
+        },false);
+
+        var B1 = document.getElementById("B1");
+        B1.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?B1.mp3", "true");
+            xhr.send()
+        },false);
+
+        var C1 = document.getElementById("C1");
+        C1.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?C1.mp3", "true");
+            xhr.send()
+        },false);
+
+        var D1 = document.getElementById("D1");
+        D1.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?D1.mp3", "true");
+            xhr.send()
+        },false);
+
+        var E1 = document.getElementById("E1");
+        E1.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?E1.mp3", "true");
+            xhr.send()
+        },false);
+
+        var F1 = document.getElementById("F1");
+        F1.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?F1.mp3", "true");
+            xhr.send()
+        },false);
+
+        var G2 = document.getElementById("G2");
+        G2.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?G2.mp3", "true");
+            xhr.send()
+        },false);
+
+        var A2 = document.getElementById("A2");
+        A2.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?A2.mp3", "true");
+            xhr.send()
+        },false);
+
+        var B2 = document.getElementById("B2");
+        B2.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?B2.mp3", "true");
+            xhr.send()
+        },false);
+
+        var C2 = document.getElementById("C2");
+        C2.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?C2.mp3", "true");
+            xhr.send()
+        },false);
+
+        var D2 = document.getElementById("D2");
+        D2.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?D2.mp3", "true");
+            xhr.send()
+        },false);
+
+        var E2 = document.getElementById("E2");
+        E2.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?E2.mp3", "true");
+            xhr.send()
+        },false);
+
+        var F2 = document.getElementById("F2");
+        F2.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?F2.mp3", "true");
+            xhr.send()
+        },false);
+
+        var G3 = document.getElementById("G3");
+        G3.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?G3.mp3", "true");
+            xhr.send()
+        },false);
+
+        var A3 = document.getElementById("A3");
+        A3.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?A3.mp3", "true");
+            xhr.send()
+        },false);
+
+        var B3 = document.getElementById("B3");
+        B3.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?B3.mp3", "true");
+            xhr.send()
+        },false);
+
+        var C3 = document.getElementById("C3");
+        C3.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?C3.mp3", "true");
+            xhr.send()
+        },false);
+
+        var D3 = document.getElementById("D3");
+        D3.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?D3.mp3", "true");
+            xhr.send()
+        },false);
+
+        var E3 = document.getElementById("E3");
+        E3.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?E3.mp3", "true");
+            xhr.send()
+        },false);
+
+        var F3 = document.getElementById("F3");
+        F3.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?F3.mp3", "true");
+            xhr.send()
+        },false);
+
+        var G4 = document.getElementById("G4");
+        G4.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?G4.mp3", "true");
+            xhr.send()
+        },false);
+
+        var A4 = document.getElementById("A4");
+        A4.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?A4.mp3", "true");
+            xhr.send()
+        },false);
+
+        var B4 = document.getElementById("B4");
+        B4.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?B4.mp3", "true");
+            xhr.send()
+        },false);
+
+        var C4 = document.getElementById("C4");
+        C4.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?C4.mp3", "true");
+            xhr.send()
+        },false);
+
+        var D4 = document.getElementById("D4");
+        D4.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?D4.mp3", "true");
+            xhr.send()
+        },false);
+
+        var E4 = document.getElementById("E4");
+        E4.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?E4.mp3", "true");
+            xhr.send()
+        },false);
+
+        var F4 = document.getElementById("F4");
+        F4.addEventListener("click",function(e){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', "http://128.197.15.153:8888/cgi_scripts/keyboard.cgi?F4.mp3", "true");
+            xhr.send()
+        },false);
+
+    </script>
+
 </div>

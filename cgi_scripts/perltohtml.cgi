@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-open FILE, '<', "example_dir/sampledata.txt" or die $!;
+open FILE, '<', "data_dir/sampledata.txt" or die $!;
 my $total = 0;
 while (<FILE>) {
     my ($value) = split;
