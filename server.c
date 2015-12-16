@@ -400,7 +400,7 @@ int cgi_script(int new_sock, char *request) {
         else if (WIFEXITED(status) && WEXITSTATUS(status)) {
           if (WEXITSTATUS(status) == -1) {
             printf("%s\n", "Error running exec in child");
-            return -1;
+            return 1;
           }
         } 
 <<<<<<< HEAD
@@ -420,7 +420,7 @@ int cgi_script(int new_sock, char *request) {
     }
     else {
       printf("%s\n", "Fork failed");
-      return -1;
+      return 1;
     }
 
     return 0;
