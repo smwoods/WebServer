@@ -111,7 +111,7 @@ int request_type(char *token) {
 
     if (strstr(token, "my-histogram") != NULL){
         return CGI_SCRIPT;
-    }else if (strstr(token, "keyboard") != NULL){
+    }else if (strstr(token, "keyboard.cgi") != NULL){
         return CGI_SCRIPT;
     }
 
