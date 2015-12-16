@@ -223,8 +223,12 @@ int request_type(char *token) {
 
     if (strstr(token, "my-histogram") != NULL){
         return CGI_SCRIPT;
+<<<<<<< HEAD
     }
     else if (strstr(token, "keyboard") != NULL){
+=======
+    }else if (strstr(token, "keyboard.cgi") != NULL){
+>>>>>>> d4b4b9c... keyboard bug fix
         return CGI_SCRIPT;
     }
 
