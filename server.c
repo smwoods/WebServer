@@ -99,6 +99,7 @@ The port number is passed as an argument */
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 int main(int argc, char *argv[]) {
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -212,6 +213,10 @@ int file_exist (char *filename)
 int file_exist(char *filename) {
   struct stat buffer;   
 >>>>>>> fddd76a... Cleaned up code
+=======
+int file_exist(char *filename) {
+  struct stat buffer;   
+>>>>>>> fec78057501a8dc9f4b4bfeffaf9df830c4d93e6
   return (stat (filename, &buffer) == 0);
 }
 
@@ -224,11 +229,17 @@ int request_type(char *token) {
     if (strstr(token, "my-histogram") != NULL){
         return CGI_SCRIPT;
 <<<<<<< HEAD
+<<<<<<< HEAD
     }
     else if (strstr(token, "keyboard") != NULL){
 =======
     }else if (strstr(token, "keyboard.cgi") != NULL){
 >>>>>>> d4b4b9c... keyboard bug fix
+=======
+
+    }
+    else if (strstr(token, "keyboard.cgi") != NULL){
+>>>>>>> fec78057501a8dc9f4b4bfeffaf9df830c4d93e6
         return CGI_SCRIPT;
     }
 
@@ -279,9 +290,16 @@ int cgi_script(int new_sock, char *request) {
     pid_t pid;
     int status;
 <<<<<<< HEAD
+<<<<<<< HEAD
     char *image_name, *data_name;
 
     //check if that image exists. if so, delete it to ensure it's dynamically created again!
+=======
+
+    char *image_name, *data_name;
+
+    //check if that image exists. if so, delete it to ensure it's dynamically created again
+>>>>>>> fec78057501a8dc9f4b4bfeffaf9df830c4d93e6
     image_name = calloc(255, 1);
     strcat(image_name, "./img_dir/");
     strcat(image_name, request);
@@ -292,6 +310,7 @@ int cgi_script(int new_sock, char *request) {
     strcat(data_name, request);
     strcat(data_name, "-data.dat");
 
+<<<<<<< HEAD
 <<<<<<< HEAD
     if(webcache == 0){
         if (file_exist(image_name)){
@@ -310,6 +329,8 @@ int cgi_script(int new_sock, char *request) {
 =======
 >>>>>>> 21c1988... merge
 =======
+=======
+>>>>>>> fec78057501a8dc9f4b4bfeffaf9df830c4d93e6
     // if (cache == 0){
     //     if (file_exist(image_name)){
     //         if(remove(image_name) != 0){
@@ -325,7 +346,10 @@ int cgi_script(int new_sock, char *request) {
     //     }
     // }
 
+<<<<<<< HEAD
 >>>>>>> fb566f8... Fixed error with arg parser
+=======
+>>>>>>> fec78057501a8dc9f4b4bfeffaf9df830c4d93e6
 
     if ((pid = fork()) == 0) {
         dup2(new_sock, STDOUT_FILENO);
@@ -383,12 +407,15 @@ int cgi_script(int new_sock, char *request) {
             exit(-1);
         }
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
         execl(request, (char*) 0);
         exit(-1);
 >>>>>>> 21c1988... merge
 =======
 >>>>>>> be3ba6b... push that shit
+=======
+>>>>>>> fec78057501a8dc9f4b4bfeffaf9df830c4d93e6
     }
 
     if (pid > 0) {
@@ -404,6 +431,7 @@ int cgi_script(int new_sock, char *request) {
           }
         } 
 <<<<<<< HEAD
+<<<<<<< HEAD
         else {
             printf("%s\n", "Error in child process");
 <<<<<<< HEAD
@@ -416,6 +444,8 @@ int cgi_script(int new_sock, char *request) {
         printf("%s\n", "Waitpid failed");
 =======
 >>>>>>> fddd76a... Cleaned up code
+=======
+>>>>>>> fec78057501a8dc9f4b4bfeffaf9df830c4d93e6
       }
     }
     else {
